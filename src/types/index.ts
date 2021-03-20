@@ -32,3 +32,33 @@ export type Address = {
     zipCode:string
     phone:string
 }
+
+export type ProductCategory = 'Clothing' | 'Shoes' | 'Watches' | 'Accessories'
+
+export type Product = {
+    id:string
+    title:string
+    description:string
+    imageUrl:string
+    imageRef:string
+    imageFileName:string
+    price:number
+    category:ProductCategory
+    inventory:number
+    creator:string
+    createdAt: firebase.firestore.Timestamp
+    updatedAt?: firebase.firestore.Timestamp
+}
+
+//product type to upload a document in firestore
+export type UploadProduct = Omit<Product,'id' | 'createdAt'> & {createdAt: firebase.firestore.FieldValue}
+
+export type AddProductData = Pick<
+Product,
+| "title"
+| "description"
+| "price"
+| "imageFileName"
+| "category"
+| "inventory"
+>

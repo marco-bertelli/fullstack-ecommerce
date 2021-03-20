@@ -10,16 +10,18 @@ type OPEN_USER_DROPDOWN = { type: "OPEN_USER_DROPDOWN"; payload:boolean}
 type FETCH_USER_INFO = { type: "FETCH_USER_INFO"; payload:UserInfo | null}
 type SIGNOUT_REDIRECT = {type:'SIGNOUT_REDIRECT'; payload:boolean}
 type SET_USER_ROLE = {type:'SET_USER_ROLE'; payload:Role | null}
+type FINISH_AUTH_CHECK = {type:'FINISH_AUTH_CHECK'; payload:boolean}
 
 
-type AuthAction = FETCH_AUTH_USER | OPEN_USER_DROPDOWN | FETCH_USER_INFO | SIGNOUT_REDIRECT | SET_USER_ROLE;
+type AuthAction = FETCH_AUTH_USER | OPEN_USER_DROPDOWN | FETCH_USER_INFO | SIGNOUT_REDIRECT | SET_USER_ROLE | FINISH_AUTH_CHECK ;
 
 type AuthState = {
   authUser: AuthUser | null;
   IsUserDropdownOpen : boolean;
   userInfo: UserInfo | null;
   signoutRedirect:boolean;
-  userRole: Role | null
+  userRole: Role | null,
+  authChecked:boolean
 };
 
 type AuthDispatch = Dispatch<AuthAction>;
@@ -60,6 +62,11 @@ export const setUserRole = (role: Role | null): SET_USER_ROLE =>({
   payload: role
 })
 
+export const finishAuthCheck = (checked : boolean) : FINISH_AUTH_CHECK =>({
+  type: 'FINISH_AUTH_CHECK',
+  payload:checked
+})
+
 //reducer function
 const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   switch (action.type) {
@@ -93,6 +100,12 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
           userRole: action.payload
         };
 
+    case 'FINISH_AUTH_CHECK':
+          return {
+            ...state,
+            authChecked: action.payload
+          };
+
     default:
       return state
   }
@@ -103,7 +116,8 @@ const initialState: AuthState = {
   IsUserDropdownOpen: false,
   userInfo:null,
   signoutRedirect:false,
-  userRole:null
+  userRole:null,
+  authChecked:false
 };
 
 const AuthContextProvider: React.FC<Props> = ({ children }) => {
@@ -126,6 +140,9 @@ const AuthContextProvider: React.FC<Props> = ({ children }) => {
           authDispatch(fetchAuthUser(null))
           authDispatch(setUserRole(null))
         }
+        //attenzione prima era messo nella graffa sotto e
+        //ritornava che l'auth era finita prima del tempo
+        authDispatch(finishAuthCheck(true));
     })
 
     return () => unsubscribe()

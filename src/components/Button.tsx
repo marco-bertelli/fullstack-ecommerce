@@ -12,7 +12,7 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const Button = forwardRef(
   (
-    { children,disabled,style,className, height = "2.7rm", width = "9rem",spinnerColor,spinnerHeight,spinnerWidth, loading,...props }: Props,
+    { children,disabled,style,className, height = "15rm", width = "9rem",spinnerColor,spinnerHeight,spinnerWidth, loading,...props }: Props,
     ref: Ref<HTMLButtonElement>
   ) => {
     return (
