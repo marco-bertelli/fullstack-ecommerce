@@ -2,20 +2,23 @@ import React, {
   createContext,
   Dispatch,
   SetStateAction,
+  useContext,
   useEffect,
   useState,
 } from "react";
-import { productsRef, snapshotToProduct } from "../firebase";
+import { productCountsRef, productsRef, snapshotToDoc } from "../firebase";
 import { useAsyncCall } from "../hooks/useAsyncCall";
 import { Product, ProductTab } from "../types";
 
 interface Props {}
 
 type Products = { [key in ProductTab]: Product[] };
+type ProductCounts = { [key in ProductTab]: number };
 
 type ProductState = {
-  products: Products;
-  loading:boolean,
+  products: Products
+  productCounts:ProductCounts
+  loading:boolean
   error:string
 };
 
@@ -36,9 +39,18 @@ const initialProducts: Products = {
   Accessories: [],
 };
 
+const initialProductCounts: ProductCounts= {
+    All: 0,
+    Clothing: 0,
+    Shoes: 0,
+    Watches: 0,
+    Accessories: 0,
+  };
+
 const ProductsContextProvider: React.FC<Props> = ({ children }) => {
   const { loading, setLoading, error, setError } = useAsyncCall();
   const [products, setProducts] = useState(initialProducts);
+  const [productCounts,setProductCounts] = useState(initialProductCounts)
 
   //effect per ottenere i prodotti da firestore !
   useEffect(() => {
@@ -46,7 +58,7 @@ const ProductsContextProvider: React.FC<Props> = ({ children }) => {
       next: (snapshots) => {
         const allProducts: Product[] = [];
         snapshots.forEach((snapshot) => {
-          const product = snapshotToProduct(snapshot);
+          const product = snapshotToDoc<Product>(snapshot);
 
           allProducts.push(product);
         });
@@ -69,8 +81,18 @@ const ProductsContextProvider: React.FC<Props> = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
+  // prendere dati per la paginazione
+  useEffect(() =>{
+    const unsubscribe = productCountsRef.doc('counts').onSnapshot((snapshot)=>{
+        const countsData=snapshot.data() as ProductCounts
+
+        setProductCounts(countsData)
+    })
+    return () => unsubscribe();
+  },[])
+
   return (
-    <ProductStateContext.Provider value={{ products,loading,error }}>
+    <ProductStateContext.Provider value={{ products,productCounts,loading,error }}>
       <ProductDispatchContext.Provider value={{ setProducts }}>
         {children}
       </ProductDispatchContext.Provider>
@@ -79,3 +101,13 @@ const ProductsContextProvider: React.FC<Props> = ({ children }) => {
 };
 
 export default ProductsContextProvider;
+
+export const useProductContext = () => {
+  const productsState = useContext(ProductStateContext)
+  const productsDispatch = useContext(ProductDispatchContext)
+
+  if(productsState === undefined || productsDispatch === undefined) throw new Error
+  ('useProductContext must be used within ProductsContextProvider')
+  
+  return {productsState, productsDispatch}
+}

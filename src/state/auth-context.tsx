@@ -1,5 +1,5 @@
 import React, {createContext,Dispatch,useEffect,useContext,useReducer} from "react";
-import { snapshotToUserInfo, usersRef } from "../firebase";
+import { snapshotToDoc, usersRef } from "../firebase";
 import { auth } from "../firebase/config";
 import { AuthUser, Role, UserInfo } from "../types";
 
@@ -156,7 +156,7 @@ const AuthContextProvider: React.FC<Props> = ({ children }) => {
       next : (doc) =>{
         if (!doc.exists) return authDispatch(fetchUserInfo(null))
 
-        const userInfo = snapshotToUserInfo(doc);
+        const userInfo = snapshotToDoc<UserInfo>(doc);
         /* 
         ! mega fix, quado un utente si registrava con mail e password non prendeva il role 
         */

@@ -4,26 +4,17 @@ import {v4 as uuidv4} from 'uuid'
 
 export const usersRef = db.collection('users')
 export const productsRef = db.collection('products')
-// trasforma uno snapshot in un infoUtente
-export const snapshotToUserInfo = (doc: firebase.firestore.DocumentSnapshot<firebase.firestore.DocumentData>) =>{
-    if(!doc.exists){ return null} 
-        
-    const docData = doc.data() as Omit<UserInfo,'id'>
-    const userInfo : UserInfo = {
-      id: doc.id,
-      ...docData
-    }
-    return userInfo
-}
+export const productCountsRef = db.collection('product-counts')
+
 //trasforma uno snaphot in tipo prodotto
-export const snapshotToProduct = (doc: firebase.firestore.DocumentSnapshot<firebase.firestore.DocumentData>) =>{
+export const snapshotToDoc = <T extends UserInfo | Product>(doc: firebase.firestore.DocumentSnapshot<firebase.firestore.DocumentData>) =>{
       
-  const docData = doc.data() as Omit<Product,'id'>
-  const product : Product = {
-    id: doc.id,
-    ...docData
+  const docData = doc.data() as T
+  const docObject : T = {
+    ...docData,
+    id: doc.id
   }
-  return product
+  return docObject
 }
 
 export const productImagesFolder = 'products'
