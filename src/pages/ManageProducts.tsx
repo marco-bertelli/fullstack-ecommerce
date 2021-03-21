@@ -3,7 +3,10 @@ import Button from "../components/Button";
 import AddAndEditProduct from "../components/manage-products/AddAndEditProduct";
 
 
-interface Props {}
+
+interface Props {
+ 
+}
 
 const ManageProducts: React.FC<Props> = () => {
 
@@ -20,7 +23,7 @@ const ManageProducts: React.FC<Props> = () => {
           Aggiungi prodotto
         </Button>
 
-        {openProductForm && <AddAndEditProduct setOpenProductForm={setOpenProductForm} />}
+        {openProductForm  && <AddAndEditProduct  setOpenProductForm={setOpenProductForm} />}
 
       </div>
       <div className="manage-products__section"></div>

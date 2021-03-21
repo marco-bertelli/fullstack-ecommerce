@@ -8,11 +8,14 @@ export const useAddProduct = () =>{
 
     const {loading,setLoading,error,setError} = useAsyncCall()
     const [uploadProgression,setUploadProgression] = useState(0);
+    const [addProductFinished,setProductFinished] = useState(false)
 
     const addNewProduct = (image:File,data:AddProductData,creator:string) => {
         const {title,description,price,category,inventory} = data
         
         setLoading(true)
+        setProductFinished(false)
+        
         //upload di un immagine verso firebase e ottenere l'url
         const imageRef=createImageRef(image.name)
 
@@ -30,7 +33,7 @@ export const useAddProduct = () =>{
             setLoading(false)
         },()=>{
             //upload finito
-            setUploadProgression(0)
+            // setUploadProgression(0)
 
             //get url
             uploadTask.snapshot.ref.getDownloadURL().then((imageUrl)=>{
@@ -49,7 +52,8 @@ export const useAddProduct = () =>{
                     createdAt:firebase.firestore.FieldValue.serverTimestamp()
                 }
                 productsRef.add(newProduct).then(()=>{
-
+                    setProductFinished(true)
+                    setLoading(false)
                 }).catch(err=>{
                     const {message} = err as {message:string}
 
@@ -63,7 +67,6 @@ export const useAddProduct = () =>{
                 setLoading(false)
             })
         })
-
-       
     }
+    return {addNewProduct,uploadProgression,addProductFinished,loading,error,setUploadProgression}
 }
