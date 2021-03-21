@@ -33,6 +33,8 @@ export type Address = {
     phone:string
 }
 
+export type ProductTab = 'All' | ProductCategory;
+
 export type ProductCategory = 'Clothing' | 'Shoes' | 'Watches' | 'Accessories'
 
 export type Product = {
