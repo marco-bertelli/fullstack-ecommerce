@@ -1,7 +1,7 @@
-import { Provider, Role, SignupData } from "../types";
+import { Provider, SignupData } from "../types";
 import { auth, functions, firebase } from "../firebase/config";
 import { useAsyncCall } from "./useAsyncCall";
-import { openUserDropdown, setUserRole, useAuthContext } from "../state/auth-context";
+import { openUserDropdown, useAuthContext } from "../state/auth-context";
 
 export const useAuthenticate = () => {
   //custom hook

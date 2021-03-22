@@ -15,7 +15,7 @@ const Layout: React.FC<Props> = ({ children }) => {
 
   useEffect(() =>{
     if (IsUserDropdownOpen) authDispatch(openUserDropdown(false))
-    // eslint-disable-next-line-react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   },[location.pathname])
 
   
