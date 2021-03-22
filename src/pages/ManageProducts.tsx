@@ -2,14 +2,19 @@ import React, { useState } from "react";
 import Button from "../components/Button";
 import AddAndEditProduct from "../components/manage-products/AddAndEditProduct";
 import AdminProductItem from "../components/manage-products/AdminProductItem";
+import Spinner from "../components/Spinner";
 import { useProductContext } from "../state/product-context";
 
 interface Props {}
 
 const ManageProducts: React.FC<Props> = () => {
   const [openProductForm, setOpenProductForm] = useState(false);
-  const {productsState:{products}} = useProductContext()
+  const {productsState:{products, loading}} = useProductContext()
 
+  if(loading) return <Spinner color='grey' width={50} height={50} />
+
+  if(!loading && products.All.length === 0) return  <h2 className='header--center'>Nessun Prodotto</h2>
+  
   return (
     <div className="page--manage-products">
       <div className="manage-products__section">
@@ -26,8 +31,7 @@ const ManageProducts: React.FC<Props> = () => {
         )}
       </div>
       <div className="manage-products__section">
-        {!products || products.All.length === 0 ? <h2 className='header--center'>Nessun Prodotto
-        </h2> : (
+        
         <table className="table">
           <thead>
             <tr>
@@ -44,7 +48,7 @@ const ManageProducts: React.FC<Props> = () => {
             {products.All.map(product =><AdminProductItem product={product} key={product.id} />)}
           </tbody>
         </table>
-        )}
+        
       </div>
     </div>
   );

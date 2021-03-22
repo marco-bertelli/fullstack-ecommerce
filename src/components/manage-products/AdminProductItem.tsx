@@ -1,5 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
+import { formatAmount } from "../../helpers";
 import { Product } from "../../types";
 
 interface Props {
@@ -11,7 +12,7 @@ const AdminProductItem: React.FC<Props> = ({product}) => {
     <tr>
       <td className="table-cell">{product.title}</td>
       <td className="table-cell"><img src={product.imageUrl} alt={product.title} width='30px' /></td>
-      <td className="table-cell">{product.price}</td>
+      <td className="table-cell">{formatAmount(product.price)}</td>
       <td className="table-cell table-cell--hide">{product.createdAt && product.createdAt.toDate().toDateString()} </td>
       <td className="table-cell table-cell--hide">{product.updatedAt && product.updatedAt.toDate().toDateString()}</td>
       <td className="table-cell">{product.inventory}</td>

@@ -54,6 +54,7 @@ const ProductsContextProvider: React.FC<Props> = ({ children }) => {
 
   //effect per ottenere i prodotti da firestore !
   useEffect(() => {
+    setLoading(true);
     const unsubscribe = productsRef.onSnapshot({
       next: (snapshots) => {
         const allProducts: Product[] = [];
@@ -74,8 +75,12 @@ const ProductsContextProvider: React.FC<Props> = ({ children }) => {
         }); // ritorna l'attay con le props di initialstate
         // dopo processo di smistaggio aggiorno lo state
         setProducts(updatedProducts)
+        setLoading(false)
     },
-      error: (err) => setError(err.message),
+      error: (err) => {
+        setError(err.message)
+        setLoading(false)
+      }
     });
 
     return () => unsubscribe();
