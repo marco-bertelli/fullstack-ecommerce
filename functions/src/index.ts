@@ -110,31 +110,31 @@ export const onProductCreated = functions.firestore
           .doc("counts").set(counts);
     });
 
-export const onProductUpdated = functions.firestore.document('products/{productId}')
+export const onProductUpdated = functions.firestore
+    .document("products/{productId}")
     .onUpdate(async (snapshot, context) => {
-      const beforeProd = snapshot.before.data() as Product 
-      const afterProd = snapshot.after.data() as Product
+      const beforeProd = snapshot.before.data() as Product;
+      const afterProd = snapshot.after.data() as Product;
 
       // controllo se la category è cambiata o meno per aggiornare
       // paginazione
 
-      if(beforeProd.category === afterProd.category) return 
+      if (beforeProd.category === afterProd.category) return;
 
       // categoria cambiata
       const countsData = await admin.firestore()
-          .collection('product-counts')
-          .doc('counts').get()
+          .collection("product-counts")
+          .doc("counts").get();
 
-      if(!countsData.exists) return 
+      if (!countsData.exists) return;
 
-      const counts =countsData.data() as Counts
+      const counts = countsData.data() as Counts;
 
-      // update counts 
-      counts[beforeProd.category] = counts[beforeProd.category] - 1
-      counts[afterProd.category] = counts[afterProd.category] + 1
+      // update counts
+      counts[beforeProd.category] = counts[beforeProd.category] - 1;
+      counts[afterProd.category] = counts[afterProd.category] + 1;
 
 
       return admin.firestore().collection("product-counts")
-      .doc("counts").set(counts);
-      
-    })
+          .doc("counts").set(counts);
+    });
