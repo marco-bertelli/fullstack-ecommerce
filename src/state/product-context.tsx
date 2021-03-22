@@ -55,7 +55,7 @@ const ProductsContextProvider: React.FC<Props> = ({ children }) => {
   //effect per ottenere i prodotti da firestore !
   useEffect(() => {
     setLoading(true);
-    const unsubscribe = productsRef.onSnapshot({
+    const unsubscribe = productsRef.orderBy('createdAt', 'desc').onSnapshot({
       next: (snapshots) => {
         const allProducts: Product[] = [];
         snapshots.forEach((snapshot) => {
