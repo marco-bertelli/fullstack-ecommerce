@@ -32,7 +32,7 @@ const ManageProducts: React.FC<Props> = () => {
         </Button>
 
         {openProductForm && (
-          <AddAndEditProduct productToEdit={productToEdit} setOpenProductForm={setOpenProductForm} />
+          <AddAndEditProduct setProductToEdit={setProductToEdit} productToEdit={productToEdit} setOpenProductForm={setOpenProductForm} />
         )}
       </div>
       <div className="manage-products__section">

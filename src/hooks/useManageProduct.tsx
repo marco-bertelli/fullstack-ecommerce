@@ -9,6 +9,7 @@ export const useManageProduct = () =>{
     const {loading,setLoading,error,setError} = useAsyncCall()
     const [uploadProgression,setUploadProgression] = useState(0);
     const [addProductFinished,setProductFinished] = useState(false)
+    const [editProductFinished,setEditProductFinished] = useState(false)
 
     const uploadImageToStorage = (image:File,cb: (imageUrl:string,imagePath:string)=>void) =>{
         setLoading(true)
@@ -74,5 +75,36 @@ export const useManageProduct = () =>{
             setLoading(false)
         })
     }
-    return {addNewProduct,uploadImageToStorage,uploadProgression,addProductFinished,loading,error,setUploadProgression}
+
+    const editProduct = (productId:string, data:AddProductData,creator:string)=> (imageUrl:string,imagePath:string) => {
+        const {title,description,price,imageFileName,category,inventory} = data
+        
+        setLoading(true)
+        setEditProductFinished(false)
+        
+        //UPDATE di un prod tramite id
+
+        const editedProduct: UploadProduct = {
+            title,
+            description,
+            price : +price,
+            category,
+            inventory:+inventory,
+            imageUrl,
+            imageFileName :imageFileName,
+            imageRef:imagePath,
+            creator,
+            updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+        }
+        productsRef.doc(productId).set(editedProduct, {merge: true}).then(()=>{
+            setEditProductFinished(true)
+            setLoading(false)
+        }).catch(err=>{
+            const {message} = err as {message:string}
+
+            setError(message)
+            setLoading(false)
+        })
+    }
+    return {addNewProduct,uploadImageToStorage,editProduct,editProductFinished,uploadProgression,addProductFinished,loading,error,setUploadProgression}
 }
