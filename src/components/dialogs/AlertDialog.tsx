@@ -5,7 +5,7 @@ import DialogWrapper from "./DialogWrapper";
 interface Props {
   header: string;
   message: string;
-  onOpenDialog?: (open: boolean) => void;
+  // onOpenDialog?: (open: boolean) => void;
   onConfirm?: () => void;
   onCancel?: () => void;
   loading?: boolean;
@@ -15,7 +15,6 @@ interface Props {
 const AlertDialog: React.FC<Props> = ({
   header,
   message,
-  onOpenDialog,
   onCancel,
   onConfirm,
   loading,
@@ -24,7 +23,7 @@ const AlertDialog: React.FC<Props> = ({
   return (
     <DialogWrapper
       header={header}
-      onOpen={onOpenDialog && !loading ? onOpenDialog : undefined}
+      onOpen={onCancel && !loading ? onCancel : undefined}
     >
       <div className="dialog-body">
         <div className="alert-message">{message}</div>
@@ -32,10 +31,7 @@ const AlertDialog: React.FC<Props> = ({
           {onCancel && (
             <Button
               className="btn--cancel"
-              onClick={() => {
-                if (onOpenDialog) onOpenDialog(false);
-                onCancel();
-              }}
+              onClick={() => onCancel()}
               disabled={loading}
             >
               Cancel

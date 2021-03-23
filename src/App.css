@@ -22,6 +22,7 @@
 
 .btn--confirm {
   background-color: teal;
+  margin-left:15%;
 }
 
 .btn--confirm:hover {

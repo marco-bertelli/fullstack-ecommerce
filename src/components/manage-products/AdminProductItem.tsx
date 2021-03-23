@@ -1,22 +1,25 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import { formatAmount } from "../../helpers";
-import { useManageProduct } from "../../hooks/useManageProduct";
 import { Product } from "../../types";
-import Spinner from "../Spinner";
+
 
 interface Props {
   product: Product;
   setOpenProductForm: (open: boolean) => void;
   setProductToEdit: (product: Product | null) => void;
+  setOpenDialog: (open: boolean) => void;
+  setProductToDelete: (product: Product | null) => void;
 }
 
 const AdminProductItem: React.FC<Props> = ({
   product,
   setOpenProductForm,
   setProductToEdit,
+  setOpenDialog,
+  setProductToDelete
 }) => {
-  const { deleteProduct, loading } = useManageProduct();
+
   return (
     <tr>
       <td className="table-cell">{product.title}</td>
@@ -41,16 +44,17 @@ const AdminProductItem: React.FC<Props> = ({
         <FontAwesomeIcon icon={["fas", "edit"]} size="1x" />
       </td>
       <td className="table-cell table-cell--icon">
-        {loading ? (
-          <Spinner color='grey' />
-        ) : (
+        
           <FontAwesomeIcon
             icon={["fas", "trash"]}
             size="1x"
             color="red"
-            onClick={() => deleteProduct(product)}
+            onClick={() => {
+              setProductToDelete(product)
+              setOpenDialog(true)
+            }}
           />
-        )}
+        
       </td>
     </tr>
   );
