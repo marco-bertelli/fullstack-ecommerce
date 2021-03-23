@@ -138,3 +138,25 @@ export const onProductUpdated = functions.firestore
       return admin.firestore().collection("product-counts")
           .doc("counts").set(counts);
     });
+
+export const onProductDeleted = functions.firestore
+    .document("products/{productId}")
+    .onDelete(async (snapshot, context) => {
+      const product = snapshot.data() as Product;
+
+      // recuper prod-counts
+      const countsData = await admin.firestore()
+          .collection("product-counts")
+          .doc("counts").get();
+
+      if (!countsData.exists) return;
+
+      const counts = countsData.data() as Counts;
+
+      // update counts
+      counts.All = counts.All -1;
+      counts[product.category] = counts[product.category] - 1;
+
+      return admin.firestore().collection("product-counts")
+          .doc("counts").set(counts);
+    });

@@ -17,9 +17,6 @@ const ManageProducts: React.FC<Props> = () => {
 
   if (loading) return <Spinner color="grey" width={50} height={50} />;
 
-  if (!loading && products.All.length === 0)
-    return <h2 className="header--center">Nessun Prodotto</h2>;
-
   return (
     <div className="page--manage-products">
       <div className="manage-products__section">
@@ -32,33 +29,41 @@ const ManageProducts: React.FC<Props> = () => {
         </Button>
 
         {openProductForm && (
-          <AddAndEditProduct setProductToEdit={setProductToEdit} productToEdit={productToEdit} setOpenProductForm={setOpenProductForm} />
+          <AddAndEditProduct
+            setProductToEdit={setProductToEdit}
+            productToEdit={productToEdit}
+            setOpenProductForm={setOpenProductForm}
+          />
         )}
       </div>
       <div className="manage-products__section">
-        <table className="table">
-          <thead>
-            <tr>
-              <th className="table-cell">Title</th>
-              <th className="table-cell">Image</th>
-              <th className="table-cell">Price (€)</th>
-              <th className="table-cell table-cell--hide">Created At</th>
-              <th className="table-cell table-cell--hide">Updated At</th>
-              <th className="table-cell">Pezzi</th>
-            </tr>
-          </thead>
+        {!loading && products.All.length === 0 ? (
+          <h2 className="header--center">Nessun Prodotto, inseriscili</h2>
+        ) : (
+          <table className="table">
+            <thead>
+              <tr>
+                <th className="table-cell">Title</th>
+                <th className="table-cell">Image</th>
+                <th className="table-cell">Price (€)</th>
+                <th className="table-cell table-cell--hide">Created At</th>
+                <th className="table-cell table-cell--hide">Updated At</th>
+                <th className="table-cell">Pezzi</th>
+              </tr>
+            </thead>
 
-          <tbody>
-            {products.All.map((product) => (
-              <AdminProductItem
-                product={product}
-                key={product.id}
-                setOpenProductForm={setOpenProductForm}
-                setProductToEdit={setProductToEdit}
-              />
-            ))}
-          </tbody>
-        </table>
+            <tbody>
+              {products.All.map((product) => (
+                <AdminProductItem
+                  product={product}
+                  key={product.id}
+                  setOpenProductForm={setOpenProductForm}
+                  setProductToEdit={setProductToEdit}
+                />
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );
