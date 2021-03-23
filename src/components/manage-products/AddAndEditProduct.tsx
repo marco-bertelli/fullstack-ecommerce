@@ -329,8 +329,8 @@ const AddAndEditProduct: React.FC<Props> = ({
             ref={register({
               required: "Pezzi obbligatorio",
               min: {
-                value: 1,
-                message: "pezzi minimi 1 ",
+                value: 0,
+                message: "pezzi minimi 0 ",
               },
               pattern: {
                 value: /^[0-9]\d*$/,
