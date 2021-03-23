@@ -10,12 +10,13 @@ import Spinner from "../components/Spinner";
 import { formatAmount, isAdmin, isClient } from "../helpers";
 import { useAuthContext } from "../state/auth-context";
 import { useModalContext } from "../state/modal-context";
+import { useManageCart } from "../hooks/useManageCart";
 
 interface Props {}
 
 const ProductDetail: React.FC<Props> = () => {
   const {
-    productsState: { products, loading },
+    productsState: { products, loading,error },
   } = useProductContext();
   //come le route di angular solo più semplici
   const params = useParams() as { productId: string };
@@ -26,6 +27,8 @@ const ProductDetail: React.FC<Props> = () => {
   } = useAuthContext();
   const { setModalType } = useModalContext();
   const [quantity, setQuantity] = useState(1);
+  const {addToCart,loading : addToCartLoading,error:addToCartError} = useManageCart()
+
 
   //quando params arriva in ingresso trova il singolo
   useEffect(() => {
@@ -37,6 +40,8 @@ const ProductDetail: React.FC<Props> = () => {
 
   //spinner per Loading
   if (loading) return <Spinner color="grey" width={50} height={50} />;
+
+  if(!loading && error) return <h2 className="header">{error}</h2>
 
   // in caso page-not-found
   if (!product) return <PageNotFound />;
@@ -113,8 +118,9 @@ const ProductDetail: React.FC<Props> = () => {
         )}
 
         <Button
-          disabled={product.inventory === 0}
-          onClick={() => {
+          disabled={product.inventory === 0 || addToCartLoading}
+          loading={addToCartLoading}
+          onClick={async() => {
             if (!authUser) {
               setModalType("signin");
               return;
@@ -123,11 +129,16 @@ const ProductDetail: React.FC<Props> = () => {
               return;
             } else if (authUser && isClient(userRole)) {
               //funzione per aggiungere al carrello
+              const finished = await addToCart(product.id,quantity,authUser.uid)
+
+              if(finished) setQuantity(1)
             }
           }}
         >
           Aggiungi al Carrello
         </Button>
+
+        {addToCartError && <p className='paragraph--error'>{addToCartError}</p>}
       </div>
     </div>
   );

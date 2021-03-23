@@ -31,12 +31,10 @@ export const useManageCart = () =>{
             const currentCartItem =snapshot.data() as UploadCartItem
 
             cartItem = {
-                product:productId,
-                quantity:currentCartItem.quantity + quantity,
-                user:userId,
-                createdAt: currentCartItem.createdAt,
-                updatedAt:firebase.firestore.FieldValue.serverTimestamp()
-            }
+                ...currentCartItem,
+                quantity: currentCartItem.quantity + quantity,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+             }
         }
 
         await cartItemRef.set(cartItem)
