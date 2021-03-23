@@ -5,9 +5,10 @@ import {
   faCartArrowDown,
   faUserCircle,
   faEdit,
-  faTrash
+  faTrash,
+  faCheckCircle
 } from "@fortawesome/free-solid-svg-icons";
 
 import {faFacebook, faGoogle} from '@fortawesome/free-brands-svg-icons'
 
-library.add(faPlus, faMinus, faCartArrowDown,faUserCircle,faFacebook, faGoogle,faEdit,faTrash);
+library.add(faPlus, faMinus, faCartArrowDown,faUserCircle,faFacebook, faGoogle,faEdit,faTrash,faCheckCircle);

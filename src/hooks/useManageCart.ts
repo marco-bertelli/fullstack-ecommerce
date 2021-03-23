@@ -6,7 +6,7 @@ import {firebase} from '../firebase/config'
 export const useManageCart = () =>{
     const {loading,setLoading, error, setError} = useAsyncCall()
 
-    const addToCart = async (productId:string,quantity:number,userId:string)=>{
+    const addToCart = async (productId:string,quantity:number,userId:string,inventory:number)=>{
        try{
 
         setLoading(true)
@@ -32,7 +32,7 @@ export const useManageCart = () =>{
 
             cartItem = {
                 ...currentCartItem,
-                quantity: currentCartItem.quantity + quantity,
+                quantity: currentCartItem.quantity + quantity >inventory ?inventory : currentCartItem.quantity + quantity,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
              }
         }

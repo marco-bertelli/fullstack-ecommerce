@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import Button from "../components/Button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -11,6 +11,8 @@ import { formatAmount, isAdmin, isClient } from "../helpers";
 import { useAuthContext } from "../state/auth-context";
 import { useModalContext } from "../state/modal-context";
 import { useManageCart } from "../hooks/useManageCart";
+import { useDialog } from "../hooks/useDialog";
+import ConfirmAddToCartDialog from "../components/dialogs/ConfirmAddToCartDialog";
 
 interface Props {}
 
@@ -28,7 +30,9 @@ const ProductDetail: React.FC<Props> = () => {
   const { setModalType } = useModalContext();
   const [quantity, setQuantity] = useState(1);
   const {addToCart,loading : addToCartLoading,error:addToCartError} = useManageCart()
-
+  const {openDialog,setOpenDialog} = useDialog()
+  const [addedCartItem,setAddedcartItem] = useState<{product: Product;quantity:number} | null>(null)
+  const history = useHistory()
 
   //quando params arriva in ingresso trova il singolo
   useEffect(() => {
@@ -129,9 +133,13 @@ const ProductDetail: React.FC<Props> = () => {
               return;
             } else if (authUser && isClient(userRole)) {
               //funzione per aggiungere al carrello
-              const finished = await addToCart(product.id,quantity,authUser.uid)
+              const finished = await addToCart(product.id,quantity,authUser.uid,product.inventory)
 
-              if(finished) setQuantity(1)
+              if(finished){
+                setOpenDialog(true)
+                setAddedcartItem({product,quantity})
+                setQuantity(1)
+              }
             }
           }}
         >
@@ -140,6 +148,18 @@ const ProductDetail: React.FC<Props> = () => {
 
         {addToCartError && <p className='paragraph--error'>{addToCartError}</p>}
       </div>
+
+      {openDialog && addedCartItem && <ConfirmAddToCartDialog header='Aggiunto al carrello'
+        cartItemData={addedCartItem}
+        goToCart={()=>{
+          setOpenDialog(false)
+          history.push('/buy/my-cart')
+        }}
+        continueShopping={()=>{
+          setOpenDialog(false)
+          history.push('/')
+        }}
+      />}
     </div>
   );
 };
