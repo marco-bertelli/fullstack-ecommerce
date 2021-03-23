@@ -23,7 +23,7 @@ const AlertDialog: React.FC<Props> = ({
   return (
     <DialogWrapper
       header={header}
-      onOpen={onCancel && !loading ? onCancel : undefined}
+      onClose={onCancel && !loading ? onCancel : undefined}
     >
       <div className="dialog-body">
         <div className="alert-message">{message}</div>
