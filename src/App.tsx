@@ -8,17 +8,20 @@ import "./fontawesome";
 import ModalContextProvider from "./state/modal-context";
 import AuthContextProvider from "./state/auth-context";
 import ProductsContextProvider from "./state/product-context";
+import CartContextProvider from "./state/CartContext";
 
 function App() {
   return (
     <AuthContextProvider>
       <ModalContextProvider>
         <ProductsContextProvider>
-          <BrowserRouter>
-            <Layout>
-              <Routes />
-            </Layout>
-          </BrowserRouter>
+          <CartContextProvider>
+            <BrowserRouter>
+              <Layout>
+                <Routes />
+              </Layout>
+            </BrowserRouter>
+          </CartContextProvider>
         </ProductsContextProvider>
       </ModalContextProvider>
     </AuthContextProvider>

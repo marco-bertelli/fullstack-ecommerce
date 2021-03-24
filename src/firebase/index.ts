@@ -1,4 +1,4 @@
-import { Product, UserInfo } from '../types'
+import { CartItem, Product, UserInfo } from '../types'
 import {db,firebase, storageRef} from './config'
 import {v4 as uuidv4} from 'uuid'
 
@@ -8,7 +8,7 @@ export const productCountsRef = db.collection('product-counts')
 export const cartRef = db.collection('cart')
 
 //trasforma uno snaphot in tipo prodotto
-export const snapshotToDoc = <T extends UserInfo | Product>(doc: firebase.firestore.DocumentSnapshot<firebase.firestore.DocumentData>) =>{
+export const snapshotToDoc = <T extends UserInfo | Product | CartItem>(doc: firebase.firestore.DocumentSnapshot<firebase.firestore.DocumentData>) =>{
       
   const docData = doc.data() as T
   const docObject : T = {
