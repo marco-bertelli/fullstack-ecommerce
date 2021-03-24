@@ -15,4 +15,6 @@ export const formatAmount = (amount: number) =>
   amount.toLocaleString("en", { minimumFractionDigits: 2 });
 
 
-  export const calculateCartQuantity = (cart:CartItem[]) => cart.reduce((qty, item) => qty + item.quantity, 0) 
+export const calculateCartQuantity = (cart:CartItem[]) => cart.reduce((qty, item) => qty + item.quantity, 0)
+
+export const calculateCartAmount = (cart:CartItem[]) => cart.reduce((amount, cartItem) => amount + (cartItem.quantity * cartItem.item.price), 0) 

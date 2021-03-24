@@ -3,6 +3,7 @@ import { cartRef, snapshotToDoc } from '../firebase';
 import { useAsyncCall } from '../hooks/useAsyncCall';
 import { CartItem } from '../types';
 import { useAuthContext } from './auth-context';
+import { useProductContext } from './product-context';
 
 interface Props {
 
@@ -25,6 +26,7 @@ const CartContextProvider: React.FC<Props> = ({children}) => {
     const[cart,setCart] = useState<CartItem[] | null>(null)
     const {authState:{authUser}} = useAuthContext()
     const {loading, setLoading, error, setError} = useAsyncCall()
+    const {productsState:{products : {All}}} = useProductContext()
 
     useEffect(()=>{
         setLoading(true);
@@ -34,6 +36,7 @@ const CartContextProvider: React.FC<Props> = ({children}) => {
             setLoading(false)
             return
         }
+        if(All.length === 0) return 
 
         // utente loggato
         const unsubscribe = cartRef.where('user','==',authUser.uid).orderBy('createdAt','desc').
@@ -42,7 +45,11 @@ const CartContextProvider: React.FC<Props> = ({children}) => {
                 const cart : CartItem[] = []
                 snapshots.forEach(snapshot=>{
                    const cartItem = snapshotToDoc<CartItem>(snapshot)
-                   cart.push(cartItem)
+                   const product = All.find(prod=>prod.id === cartItem.product)
+                   
+                   if(!product) return
+                   
+                   cart.push({...cartItem,item:product})
                 })
                setCart(cart) 
             },
@@ -52,7 +59,7 @@ const CartContextProvider: React.FC<Props> = ({children}) => {
             }
         })
         return () => unsubscribe()
-    },[authUser, setCart, setLoading, setError])
+    },[authUser, setCart, setLoading, setError, All])
     
     return (
             <CartStateContext.Provider value={{cart, loading, error}}>
