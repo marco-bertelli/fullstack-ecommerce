@@ -13,6 +13,7 @@ import { useModalContext } from "../state/modal-context";
 import { useManageCart } from "../hooks/useManageCart";
 import { useDialog } from "../hooks/useDialog";
 import ConfirmAddToCartDialog from "../components/dialogs/ConfirmAddToCartDialog";
+import { useCartContext } from "../state/CartContext";
 
 interface Props {}
 
@@ -33,6 +34,7 @@ const ProductDetail: React.FC<Props> = () => {
   const {openDialog,setOpenDialog} = useDialog()
   const [addedCartItem,setAddedcartItem] = useState<{product: Product;quantity:number} | null>(null)
   const history = useHistory()
+  const {cart} = useCartContext()
 
   //quando params arriva in ingresso trova il singolo
   useEffect(() => {
@@ -132,6 +134,26 @@ const ProductDetail: React.FC<Props> = () => {
               alert("Sei un admin non puoi aggiungere al carrello");
               return;
             } else if (authUser && isClient(userRole)) {
+              //controllo sulla quantità 
+              // Check if this item is already in the existing cart, and if it is, check it's cart quantity vs it's inventory
+
+              const foundItem = cart
+                ? cart.find((item) => item.product === product.id)
+                : undefined
+
+              if (
+                foundItem &&
+                foundItem.quantity + quantity > product.inventory
+              ) {
+                const allowedQty = product.inventory - foundItem.quantity
+                setQuantity(allowedQty === 0 ? 1 : allowedQty)
+                alert(
+                  `hai già "${foundItem.quantity} pcs" di questo prodotto nel carrello, perciò ne puoi aggiungere massimo "${allowedQty} pcs".`
+                )
+                return
+              }
+
+
               //funzione per aggiungere al carrello
               const finished = await addToCart(product.id,quantity,authUser.uid,product.inventory)
 
