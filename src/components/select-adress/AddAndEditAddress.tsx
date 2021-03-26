@@ -22,7 +22,7 @@ const AddAndEditAddress: React.FC<Props> = ({userInfo}) => {
 	})
 
   return (
-    <form className="form" onSubmit={handleAddNewAddress}>
+    <form className="form" onSubmit={handleAddNewAddress} style={{width:'100%'}}>
       <Input
         label="Fullname"
         name="fullname"
