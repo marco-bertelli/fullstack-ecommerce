@@ -23,7 +23,7 @@ const SelectAdress: React.FC<Props> = () => {
         <div className="select-address__add-new">
           <h3 className="header">Aggiungi indirizzo</h3>
 
-          <AddAndEditAddress />
+          <AddAndEditAddress userInfo={userInfo} />
         </div>
       </div>
     </div>

@@ -14,8 +14,8 @@ export type UserInfo = {
   email: string;
   role: Role;
   createdAt: firebase.firestore.Timestamp;
-  shippingAddress: Address[];
-  stripeCustomerId: string;
+  shippingAddress?: Address[];
+  stripeCustomerId?: string;
   updatedAt?: firebase.firestore.Timestamp;
 };
 

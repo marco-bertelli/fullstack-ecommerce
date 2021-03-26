@@ -1,16 +1,24 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { Address } from "../../types";
+import { useAddShippingAddress } from "../../hooks/useAddShippingAddress";
+import { Address, UserInfo } from "../../types";
 import Button from "../Button";
 import Input from "../Input";
 
-interface Props {}
+interface Props {
+	userInfo: UserInfo | null
+}
 
-const AddAndEditAddress: React.FC<Props> = () => {
-  const { register, errors, handleSubmit } = useForm<Omit<Address, "index">>();
+const AddAndEditAddress: React.FC<Props> = ({userInfo}) => {
+  const { register, errors, handleSubmit, reset} = useForm<Omit<Address, "index">>();
+	const {addNewAddress, loading, error} = useAddShippingAddress()
 
-	const handleAddNewAddress = handleSubmit((data) =>{
-		console.log(data)
+	const handleAddNewAddress = handleSubmit(async (data) =>{
+		if(!userInfo) return 
+
+		const finished = await addNewAddress(data,userInfo)
+
+		if(finished) reset()
 	})
 
   return (
@@ -67,8 +75,10 @@ const AddAndEditAddress: React.FC<Props> = () => {
         error={errors.phone?.message}
       />
 
-			<Button type='submit' width='100%'>Salva</Button>
-    </form>
+			<Button loading={loading} disabled={loading} type='submit' width='100%'>Salva</Button>
+    
+		{error && <p className="paragraph paragraph--error">{error}</p>}
+		</form>
   );
 };
 
