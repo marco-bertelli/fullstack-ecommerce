@@ -1,22 +1,31 @@
-import React from "react";
+import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import Button from "../components/Button";
 import MyCartItem from "../components/cart/MyCartItem";
+import AlertDialog from "../components/dialogs/AlertDialog";
 import Spinner from "../components/Spinner";
 import {
   calculateCartAmount,
   calculateCartQuantity,
   formatAmount,
 } from "../helpers";
+import { useDialog } from "../hooks/useDialog";
+import { useManageCart } from "../hooks/useManageCart";
 import { useCartContext } from "../state/CartContext";
+import { CartItem } from "../types";
 
 interface Props {}
 
 const MyCart: React.FC<Props> = () => {
   const { cart } = useCartContext();
   const history = useHistory();
+  const { openDialog, setOpenDialog } = useDialog();
+  const { removeCartItem, loading, error } = useManageCart();
+  const [cartItemToDelete, setCartItemToDelete] = useState<CartItem | null>(
+    null
+  );
 
-  if (!cart) return <Spinner color="grey" height={25} width={25} />;
+  if (!cart) return <Spinner color="grey" height={50} width={50} />;
 
   if (cart && cart.length === 0)
     return (
@@ -38,7 +47,13 @@ const MyCart: React.FC<Props> = () => {
 
         <div className="cart-detail">
           {cart.map((item) => (
-            <MyCartItem key={item.id} cartItem={item} />
+            <MyCartItem
+              key={item.id}
+              cartItem={item}
+              setOpenDialog={setOpenDialog}
+              setCartItemToDelete={setCartItemToDelete}
+              openDialog={openDialog}
+            />
           ))}
         </div>
       </div>
@@ -71,6 +86,29 @@ const MyCart: React.FC<Props> = () => {
           Vai al Checkout
         </Button>
       </div>
+      {openDialog && cartItemToDelete && (
+        <AlertDialog
+          header="Conferma"
+          message={`sei sicuro di voler eliminare ${cartItemToDelete.item.title} dal carrello?`}
+          onCancel={() =>{
+            setCartItemToDelete(null)
+            setOpenDialog(false)
+          }}
+
+          onConfirm={async() => {
+            if(cartItemToDelete){
+              const finish = await removeCartItem(cartItemToDelete.item.id, cartItemToDelete.user)
+              if(finish){
+                setCartItemToDelete(null)
+                setOpenDialog(false)
+              }
+            }
+          }}
+
+          loading={loading}
+          error={error}
+        />
+      )}
     </div>
   );
 };
