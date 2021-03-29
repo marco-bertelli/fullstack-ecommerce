@@ -77,7 +77,6 @@ export const useManageShippingAddress = () => {
   };
 
   const deleteAddress = async (
-    data: Omit<Address, "index">,
     index: number,
     userInfo: UserInfo
   ) => {

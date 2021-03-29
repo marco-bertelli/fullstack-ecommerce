@@ -6,9 +6,11 @@ import Button from "../Button";
 interface Props {
   address: Address;
   setAddressToEdit: (address: Address | null) => void;
+  setAddressToDelete: (address: Address | null) => void;
+  setOpenDialog : (boolean: boolean) => void;
 }
 
-const ShippingAddress: React.FC<Props> = ({ address, setAddressToEdit }) => {
+const ShippingAddress: React.FC<Props> = ({ address, setAddressToEdit,setAddressToDelete, setOpenDialog }) => {
   const { fullname, address1, address2, city, phone, zipCode } = address;
   return (
     <div className="shipping-address">
@@ -37,6 +39,10 @@ const ShippingAddress: React.FC<Props> = ({ address, setAddressToEdit }) => {
           size="1x"
           color="red"
           style={{ cursor: "pointer" }}
+          onClick={()=>{
+            setAddressToDelete(address)
+            setOpenDialog(true)
+          }}
         />
       </div>
     </div>
