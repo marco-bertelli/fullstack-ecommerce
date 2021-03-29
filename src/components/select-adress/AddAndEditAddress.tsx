@@ -1,6 +1,6 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { useAddShippingAddress } from "../../hooks/useAddShippingAddress";
+import { useManageShippingAddress } from "../../hooks/useManageShippingAddress";
 import { Address, UserInfo } from "../../types";
 import Button from "../Button";
 import Input from "../Input";
@@ -11,7 +11,7 @@ interface Props {
 
 const AddAndEditAddress: React.FC<Props> = ({userInfo}) => {
   const { register, errors, handleSubmit, reset} = useForm<Omit<Address, "index">>();
-	const {addNewAddress, loading, error} = useAddShippingAddress()
+	const {addNewAddress, loading, error} = useManageShippingAddress()
 
 	const handleAddNewAddress = handleSubmit(async (data) =>{
 		if(!userInfo) return 

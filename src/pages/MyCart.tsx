@@ -81,7 +81,7 @@ const MyCart: React.FC<Props> = () => {
           width="100%"
           className="btn--orange"
           style={{ margin: "1rem 0" }}
-          onClick={() => history.push("/buy/select-adress")}
+          onClick={() => history.push("/buy/select-address")}
         >
           Vai al Checkout
         </Button>
