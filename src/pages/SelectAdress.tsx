@@ -1,10 +1,13 @@
 import React, { useState } from "react";
+import { Redirect } from "react-router";
 import AlertDialog from "../components/dialogs/AlertDialog";
 import AddAndEditAddress from "../components/select-adress/AddAndEditAddress";
 import ShippingAddress from "../components/select-adress/ShippingAddress";
+import Spinner from "../components/Spinner";
 import { useDialog } from "../hooks/useDialog";
 import { useManageShippingAddress } from "../hooks/useManageShippingAddress";
 import { useAuthContext } from "../state/auth-context";
+import { useCartContext } from "../state/CartContext";
 import { Address } from "../types";
 
 interface Props {}
@@ -14,6 +17,7 @@ const SelectAdress: React.FC<Props> = () => {
     authState: { userInfo },
   } = useAuthContext();
 
+  const {cart} = useCartContext()
   const [addressToEdit, setAddressToEdit] = useState<Address | null>();
   const { openDialog, setOpenDialog } = useDialog();
   const [
@@ -23,14 +27,22 @@ const SelectAdress: React.FC<Props> = () => {
 
   const { deleteAddress, loading, error } = useManageShippingAddress();
 
+  //controllo per spinner
+  if(!userInfo) return <Spinner color='grey' height={50} width={50} />
+  //se carrello vuoto non posso accedere a questa pagina
+  if((cart && cart.length ===0)) return <Redirect to='' /> 
+
   return (
     <div className="page--select-address">
       <h2 className="header">Seleziona indirizzo spedizione</h2>
 
       <div className="select-address">
         <div className="select-address__existing">
-          {!userInfo?.shippingAddress || userInfo.shippingAddress.length=== 0 ? <p className='paragraph'>Nessun indirizzo aggiungine uno</p>
-           : userInfo.shippingAddress.map((address, index) => (
+          {!userInfo?.shippingAddress ||
+          userInfo.shippingAddress.length === 0 ? (
+            <p className="paragraph">Nessun indirizzo aggiungine uno</p>
+          ) : (
+            userInfo.shippingAddress.map((address, index) => (
               <ShippingAddress
                 key={index}
                 address={{ ...address, index }}
@@ -38,7 +50,8 @@ const SelectAdress: React.FC<Props> = () => {
                 setAddressToDelete={setAddressItemToDelete}
                 setOpenDialog={setOpenDialog}
               />
-            ))}
+            ))
+          )}
         </div>
 
         <div className="select-address__add-new">
@@ -71,7 +84,7 @@ const SelectAdress: React.FC<Props> = () => {
                 setAddressItemToDelete(null);
                 setOpenDialog(false);
               }
-            } else alert('qualcosa è andato storto nell eliminazione')
+            } else alert("qualcosa è andato storto nell eliminazione");
           }}
           loading={loading}
           error={error}
