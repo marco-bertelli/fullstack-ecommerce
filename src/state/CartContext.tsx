@@ -39,8 +39,7 @@ const CartContextProvider: React.FC<Props> = ({children}) => {
         if(All.length === 0) return 
 
         // utente loggato
-        const unsubscribe = cartRef.where('user','==',authUser.uid).orderBy('createdAt','desc').
-        onSnapshot({
+        const unsubscribe = cartRef.where('user','==',authUser.uid).orderBy('createdAt','desc').onSnapshot({
             next : (snapshots) =>{
                 const cart : CartItem[] = []
                 snapshots.forEach(snapshot=>{

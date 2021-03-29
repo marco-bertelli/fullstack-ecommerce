@@ -76,5 +76,46 @@ export const useManageShippingAddress = () => {
     }
   };
 
-  return { addNewAddress, editAddress, loading, error };
+  const deleteAddress = async (
+    data: Omit<Address, "index">,
+    index: number,
+    userInfo: UserInfo
+  ) => {
+    try {
+      if (!userInfo.shippingAddress) {
+        setError(
+          "Ops, sembra che non riesca a modificare questo indirizzo prova ad aggiornare la pagina"
+        );
+        return false
+      }
+      setLoading(true);
+
+      // array degli indirizzi
+      const currentShippingAddresses = userInfo.shippingAddress
+
+      //delete dell'array (solo oggetto selexionato)
+      currentShippingAddresses.splice(index,1)
+
+      //info aggiornate
+      const updatedUserInfo = { 
+        shippingAddress:currentShippingAddresses,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }
+
+      //update user doc su firestore
+      await usersRef.doc(userInfo.id).set(updatedUserInfo,{merge:true})
+
+      setLoading(false);
+
+      return true;
+    } catch (error) {
+      const { message } = error as { message: string };
+      setError(message);
+      setLoading(false);
+
+      return false;
+    }
+  };
+
+  return { addNewAddress, editAddress, deleteAddress, loading, error };
 };
