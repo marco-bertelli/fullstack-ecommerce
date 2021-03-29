@@ -16,11 +16,12 @@ const SelectAdress: React.FC<Props> = () => {
 
   const [addressToEdit, setAddressToEdit] = useState<Address | null>();
   const { openDialog, setOpenDialog } = useDialog();
-  const [addressItemToDelete, setAddressItemToDelete] = useState<Address | null>(
-    null
-  );
+  const [
+    addressItemToDelete,
+    setAddressItemToDelete,
+  ] = useState<Address | null>(null);
 
-  const {deleteAddress,loading, error } = useManageShippingAddress()
+  const { deleteAddress, loading, error } = useManageShippingAddress();
 
   return (
     <div className="page--select-address">
@@ -28,11 +29,11 @@ const SelectAdress: React.FC<Props> = () => {
 
       <div className="select-address">
         <div className="select-address__existing">
-          {userInfo?.shippingAddress?.length &&
-            userInfo.shippingAddress.map((address, index) => (
+          {!userInfo?.shippingAddress || userInfo.shippingAddress.length=== 0 ? <p className='paragraph'>Nessun indirizzo aggiungine uno</p>
+           : userInfo.shippingAddress.map((address, index) => (
               <ShippingAddress
                 key={index}
-                address={{...address,index}}
+                address={{ ...address, index }}
                 setAddressToEdit={setAddressToEdit}
                 setAddressToDelete={setAddressItemToDelete}
                 setOpenDialog={setOpenDialog}
@@ -43,29 +44,35 @@ const SelectAdress: React.FC<Props> = () => {
         <div className="select-address__add-new">
           <h3 className="header">Aggiungi indirizzo</h3>
 
-          <AddAndEditAddress userInfo={userInfo} addressToEdit={addressToEdit} setAddressToEdit={setAddressToEdit} />
+          <AddAndEditAddress
+            userInfo={userInfo}
+            addressToEdit={addressToEdit}
+            setAddressToEdit={setAddressToEdit}
+          />
         </div>
       </div>
       {openDialog && addressItemToDelete && (
         <AlertDialog
           header="Conferma"
-          message={`sei sicuro di voler eliminare il ${addressItemToDelete.index} dagli indirizzi?`}
-          onCancel={() =>{
-            setAddressItemToDelete(null)
-            setOpenDialog(false)
+          message={`sei sicuro di voler eliminare questo indirizzo?`}
+          onCancel={() => {
+            setAddressItemToDelete(null);
+            setOpenDialog(false);
           }}
+          onConfirm={async () => {
+            if (addressItemToDelete.index !== undefined && userInfo) {
+              if (typeof addressItemToDelete.index !== "number") return;
 
-          onConfirm={async() => {
-            if(addressItemToDelete.index !== undefined && userInfo){
-              const finish = await deleteAddress(addressItemToDelete.index, userInfo)
-              if(finish){
-                setAddressItemToDelete(null)
-                setOpenDialog(false)
+              const finish = await deleteAddress(
+                addressItemToDelete.index,
+                userInfo
+              );
+              if (finish) {
+                setAddressItemToDelete(null);
+                setOpenDialog(false);
               }
-            }
-            else console.log(userInfo)
+            } else alert('qualcosa è andato storto nell eliminazione')
           }}
-
           loading={loading}
           error={error}
         />

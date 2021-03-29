@@ -81,9 +81,9 @@ export const useManageShippingAddress = () => {
     userInfo: UserInfo
   ) => {
     try {
-      if (!userInfo.shippingAddress) {
+      if (!userInfo.shippingAddress || userInfo.shippingAddress.length === 0) {
         setError(
-          "Ops, sembra che non riesca a modificare questo indirizzo prova ad aggiornare la pagina"
+          "Qualcosa è andato storto"
         );
         return false
       }
