@@ -1,7 +1,8 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { CardElement } from "@stripe/react-stripe-js";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useEffect } from "react";
+import { useForm } from "react-hook-form";
 import { Redirect, useHistory } from "react-router-dom";
 import Button from "../components/Button";
 import { calculateCartAmount, calculateCartQuantity } from "../helpers";
@@ -19,6 +20,14 @@ const Checkout: React.FC<Props> = () => {
   const { state } = location;
   const { cart } = useCartContext();
 
+  const btnRef = useRef<HTMLButtonElement>(null)
+
+  const { register, errors, handleSubmit } = useForm<{
+    cardName: string;
+    save?: boolean;
+    setDefault?: boolean;
+  }>();
+
   useEffect(() => {
     if (cart && cart.length > 0)
       setOrderSummary({
@@ -26,6 +35,14 @@ const Checkout: React.FC<Props> = () => {
         amount: calculateCartAmount(cart),
       });
   }, [cart]);
+
+  const handleClickBtn = () => {
+    if(btnRef && btnRef.current) btnRef.current.click()
+  }
+
+  const handleCompletePayment = handleSubmit((data)=>{
+    console.log(data)
+  })
 
   if (!state?.address) return <Redirect to="/buy/select-address" />;
 
@@ -36,7 +53,7 @@ const Checkout: React.FC<Props> = () => {
       <div className="payment">
         <h2 className="header">Seleziona un metodo di pagamento</h2>
 
-        <form className="form">
+        <form className="form" onSubmit={handleCompletePayment}>
           <div className="form--new-card">
             <label htmlFor="newCard" className="card card--new">
               <input
@@ -84,7 +101,16 @@ const Checkout: React.FC<Props> = () => {
                   className="input input--card-name"
                   name="cardName"
                   placeholder="nome titolare "
+                  ref={register({
+                    required: "titolare della carta obbligatorio",
+                  })}
                 />
+
+                {errors.cardName && (
+                  <p className="paragraph paragraph--small paragraph--error">
+                    {errors.cardName.message}
+                  </p>
+                )}
               </div>
               <div className="form__input-container form__input-container--card">
                 <CardElement
@@ -99,7 +125,7 @@ const Checkout: React.FC<Props> = () => {
 
               <div className="form__set-new-card">
                 <div className="form__input-container">
-                  <input type="checkbox" name="save" />
+                  <input type="checkbox" name="save" ref={register} />
                   <label htmlFor="saveCard" className="paragraph">
                     Salva questa carta
                   </label>
@@ -108,15 +134,15 @@ const Checkout: React.FC<Props> = () => {
 
               <div className="form__set-new-card">
                 <div className="form__input-container">
-                  <input type="checkbox" name="setDefault" />
+                  <input type="checkbox" name="setDefault" ref={register} />
                   <label htmlFor="setDefault" className="paragraph">
                     Imposta come predefinita
                   </label>
                 </div>
               </div>
-              
             </div>
           </div>
+          <button ref={btnRef} style={{display:'none'}}></button>
         </form>
       </div>
 
@@ -153,7 +179,7 @@ const Checkout: React.FC<Props> = () => {
           </div>
         </div>
         <div className="summary__section">
-          <Button width="100%" className="btn--orange btn--payment">
+          <Button onClick={handleClickBtn} width="100%" className="btn--orange btn--payment">
             Completa Pagamento
           </Button>
         </div>
