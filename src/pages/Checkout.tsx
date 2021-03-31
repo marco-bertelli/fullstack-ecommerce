@@ -60,7 +60,7 @@ const Checkout: React.FC<Props> = () => {
                 {orderSummary && orderSummary.quantity}
               </p>
               <p className="paragraph paragraph--focus">
-                {orderSummary && orderSummary.amount}
+                €{orderSummary && orderSummary.amount}
               </p>
             </div>
           </div>
