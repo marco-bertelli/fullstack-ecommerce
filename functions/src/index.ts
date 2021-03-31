@@ -1,5 +1,6 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
+import Stripe from "stripe";
 
 admin.initializeApp();
 
@@ -22,6 +23,11 @@ type Product = {
   inventory: number;
   creator: string;
 };
+
+const stripe=new Stripe(env.stripe.secret_key, {
+  apiVersion: "2020-08-27",
+  typescript: true,
+});
 
 export const onSignup = functions.https.onCall(async (data, context) => {
   // prendo il nome utente
@@ -159,4 +165,19 @@ export const onProductDeleted = functions.firestore
 
       return admin.firestore().collection("product-counts")
           .doc("counts").set(counts);
+    });
+export const createPaymentIntents = functions.https.onCall(
+    async (data, context) => {
+      if (!context.auth) throw new Error("Non autenticato");
+
+      const {amount, customer, paymentMethod} =
+      data as {amount: number; customer?:string;paymentMethod?:string};
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount * 100,
+        currency: "eur",
+        customer,
+        payment_method: paymentMethod,
+      });
+      return {clientsSecret: paymentIntent.client_secret};
     });

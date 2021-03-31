@@ -66,6 +66,14 @@ const Checkout: React.FC<Props> = () => {
     const cardElement = elements.getElement(CardElement)
     console.log(data);
     console.log(cardElement);
+
+    // New card 
+
+    // new card -to save 
+
+    //new card not save
+
+    //carta esistente
   });
 
   const handleCardChange = (e: StripeCardElementChangeEvent) =>{
