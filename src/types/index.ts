@@ -77,3 +77,9 @@ export type UploadCartItem = Omit<CartItem, 'id' | 'item' | 'createdAt' | 'updat
   createdAt: firebase.firestore.FieldValue
   updatedAt?: firebase.firestore.FieldValue
 }
+
+export type CreatePaymentIntentData = {
+  amount: number;
+  customer?: string;
+  paymentMethod?: string;
+}

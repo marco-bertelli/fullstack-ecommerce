@@ -8,8 +8,9 @@ import { Redirect } from "react-router-dom";
 import Button from "../components/Button";
 import Spinner from "../components/Spinner";
 import { calculateCartAmount, calculateCartQuantity } from "../helpers";
+import { useCheckout } from "../hooks/useCheckout";
 import { useCartContext } from "../state/CartContext";
-import { Address } from "../types";
+import { Address, CreatePaymentIntentData } from "../types";
 
 interface Props {}
 
@@ -25,6 +26,7 @@ const Checkout: React.FC<Props> = () => {
   const [loadAddress, setLoadAddress] = useState(true)
 
   const { cart } = useCartContext();
+  const {completePayment, loading, error} = useCheckout()
   const elements = useElements()
 
   const btnRef = useRef<HTMLButtonElement>(null);
@@ -60,19 +62,29 @@ const Checkout: React.FC<Props> = () => {
     if (btnRef && btnRef.current) btnRef.current.click();
   };
 
-  const handleCompletePayment = handleSubmit((data) => {
-    if(!elements) return;
+  const handleCompletePayment = handleSubmit(async (data) => {
+    if(!elements || !orderSummary) return;
+    
+    if(useNewCard) {
+      // New card 
+      const cardElement = elements.getElement(CardElement)
+      if(!cardElement) return 
 
-    const cardElement = elements.getElement(CardElement)
-    console.log(data);
-    console.log(cardElement);
+      if(typeof data.save === 'boolean'){
+        if(!data.save){
+           // new card -to save 
+           //get a client secre con la cloud functions
+           const createPaymentIntentData: CreatePaymentIntentData = {
+              amount: orderSummary.amount
+           }
+           return completePayment(createPaymentIntentData)
 
-    // New card 
+        } else {
+          //new card not save
 
-    // new card -to save 
-
-    //new card not save
-
+        }
+      }
+    }
     //carta esistente
   });
 
@@ -225,8 +237,9 @@ const Checkout: React.FC<Props> = () => {
           <Button
             onClick={handleClickBtn}
             width="100%"
-            disabled={!useNewCard || disabled}
+            disabled={!useNewCard || disabled || loading}
             className="btn--orange btn--payment"
+            loading={loading}
           >
             Completa Pagamento
           </Button>
