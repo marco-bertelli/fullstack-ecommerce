@@ -1,11 +1,19 @@
-import React from 'react'
+import React from "react";
+import { Redirect, useHistory } from "react-router-dom";
+import { isGetAccessorDeclaration } from "typescript";
+import { Address } from "../types";
 
-interface Props {
-
-}
+interface Props {}
 
 const Checkout: React.FC<Props> = () => {
-        return <div>Checkout</div>
-}
+  const { location } = useHistory<{address: Address}>();
+  const { state } = location;
 
-export default Checkout
+  if(!state?.address) return <Redirect to='/buy/select-address' />
+
+  const {fullname, address1, address2, city, zipCode, phone} = state.address
+
+  return <div></div>;
+};
+
+export default Checkout;

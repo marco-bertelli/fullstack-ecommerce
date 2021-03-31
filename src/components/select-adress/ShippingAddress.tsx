@@ -1,5 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
+import { useHistory } from "react-router-dom";
 import { Address } from "../../types";
 import Button from "../Button";
 
@@ -12,6 +13,7 @@ interface Props {
 
 const ShippingAddress: React.FC<Props> = ({ address, setAddressToEdit,setAddressToDelete, setOpenDialog }) => {
   const { fullname, address1, address2, city, phone, zipCode } = address;
+  const history = useHistory()
   return (
     <div className="shipping-address">
       <div className="shipping-address__detail">
@@ -23,7 +25,9 @@ const ShippingAddress: React.FC<Props> = ({ address, setAddressToEdit,setAddress
         <p className="paragraph">{phone}</p>
       </div>
 
-      <Button width="100%" className="btn--orange" style={{ margin: "1rem 0" }}>
+      <Button width="100%" className="btn--orange" style={{ margin: "1rem 0" }}
+      onClick={()=>history.push({pathname:'/buy/checkout', state:{address}})}
+      >
         Spedisci a questo indirizzo
       </Button>
 
