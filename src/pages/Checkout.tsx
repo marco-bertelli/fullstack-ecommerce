@@ -1,10 +1,12 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { CardElement } from "@stripe/react-stripe-js";
+import { CardElement, useElements } from "@stripe/react-stripe-js";
+import { StripeCardElementChangeEvent } from "@stripe/stripe-js";
 import React, { useRef, useState } from "react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { Redirect, useHistory } from "react-router-dom";
+import { Redirect } from "react-router-dom";
 import Button from "../components/Button";
+import Spinner from "../components/Spinner";
 import { calculateCartAmount, calculateCartQuantity } from "../helpers";
 import { useCartContext } from "../state/CartContext";
 import { Address } from "../types";
@@ -16,11 +18,16 @@ const Checkout: React.FC<Props> = () => {
     quantity: number;
     amount: number;
   }>();
-  const { location } = useHistory<{ address: Address }>();
-  const { state } = location;
-  const { cart } = useCartContext();
+  const [useNewCard, setUseNewCard] = useState(false);
+  const [disabled, setDisabled] = useState(true);
+  const [NewCardError, setNewCardError] = useState('');
+  const [address, setAddress] = useState<Address | null>(null)
+  const [loadAddress, setLoadAddress] = useState(true)
 
-  const btnRef = useRef<HTMLButtonElement>(null)
+  const { cart } = useCartContext();
+  const elements = useElements()
+
+  const btnRef = useRef<HTMLButtonElement>(null);
 
   const { register, errors, handleSubmit } = useForm<{
     cardName: string;
@@ -36,17 +43,42 @@ const Checkout: React.FC<Props> = () => {
       });
   }, [cart]);
 
+  useEffect(() => {
+    const addressData=window.localStorage.getItem('shippingAddress')
+    if(!addressData) {
+      setLoadAddress(false)
+      return
+    } 
+
+    const address = JSON.parse(addressData)
+    setAddress(address)
+    setLoadAddress(false)
+
+  },[setAddress,setLoadAddress])
+
   const handleClickBtn = () => {
-    if(btnRef && btnRef.current) btnRef.current.click()
+    if (btnRef && btnRef.current) btnRef.current.click();
+  };
+
+  const handleCompletePayment = handleSubmit((data) => {
+    if(!elements) return;
+
+    const cardElement = elements.getElement(CardElement)
+    console.log(data);
+    console.log(cardElement);
+  });
+
+  const handleCardChange = (e: StripeCardElementChangeEvent) =>{
+    setDisabled(e.empty || !e.complete)
+    setNewCardError(e.error ? e.error.message : '')
+
+    if(e.complete) setNewCardError('')
   }
 
-  const handleCompletePayment = handleSubmit((data)=>{
-    console.log(data)
-  })
+  if(loadAddress) return <Spinner color='grey' width={50} height={50} />
+  if (!address) return <Redirect to="/buy/select-address" />;
 
-  if (!state?.address) return <Redirect to="/buy/select-address" />;
-
-  const { fullname, address1, address2, city, zipCode, phone } = state.address;
+  const { fullname, address1, address2, city, zipCode, phone } = address;
 
   return (
     <div className="page--checkout">
@@ -61,6 +93,7 @@ const Checkout: React.FC<Props> = () => {
                 name="card"
                 value="new-card"
                 style={{ width: "10%" }}
+                onClick={()=>setUseNewCard(true)}
               />
 
               <h4
@@ -120,7 +153,9 @@ const Checkout: React.FC<Props> = () => {
                       invalid: { color: "red", iconColor: "red" },
                     },
                   }}
+                  onChange={handleCardChange}
                 />
+                {NewCardError && <p className='paragarph paragraph--error'>{NewCardError}</p>}
               </div>
 
               <div className="form__set-new-card">
@@ -142,7 +177,7 @@ const Checkout: React.FC<Props> = () => {
               </div>
             </div>
           </div>
-          <button ref={btnRef} style={{display:'none'}}></button>
+          <button ref={btnRef} style={{ display: "none" }}></button>
         </form>
       </div>
 
@@ -179,7 +214,12 @@ const Checkout: React.FC<Props> = () => {
           </div>
         </div>
         <div className="summary__section">
-          <Button onClick={handleClickBtn} width="100%" className="btn--orange btn--payment">
+          <Button
+            onClick={handleClickBtn}
+            width="100%"
+            disabled={!useNewCard || disabled}
+            className="btn--orange btn--payment"
+          >
             Completa Pagamento
           </Button>
         </div>
