@@ -7,10 +7,13 @@ import Checkout from '../pages/Checkout';
 import PageNotFound from '../pages/Checkout';
 import { Role } from '../types';
 import { isClient } from '../helpers';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
 
 interface Props {
 
 }
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY!)
 
 const BuyRoutes: React.FC<Props> = (props) => {
     const {userRole} =props as {userRole:Role | null}
@@ -28,7 +31,9 @@ const BuyRoutes: React.FC<Props> = (props) => {
                     <SelectAdress />
                 </Route>
                 <Route path="/buy/checkout">
-                    <Checkout />
+                    <Elements stripe={stripePromise}>
+                        <Checkout />
+                    </Elements>
                 </Route>
                 <Route path='*'>
                     <PageNotFound />
