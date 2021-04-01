@@ -1,12 +1,16 @@
+import { Stripe } from "@stripe/stripe-js";
 import { functions } from "../firebase/config";
-import { CreatePaymentIntentData } from "../types";
+import { CreatePaymentIntentData, PaymentMethod } from "../types";
 import { useAsyncCall } from "./useAsyncCall";
 
 export const useCheckout = () => {
   const { loading, setLoading, error, setError } = useAsyncCall();
 
   const completePayment = async (
-    createPaymentIntentData: CreatePaymentIntentData
+    createPaymentIntentData: CreatePaymentIntentData,
+    stripe: Stripe,
+    payment_method: PaymentMethod,
+    save: boolean | undefined
   ) => {
     try {
       setLoading(true);
@@ -16,21 +20,41 @@ export const useCheckout = () => {
         "createPaymentIntents"
       );
 
-      const paymentIntent = await createPaymentIntents(createPaymentIntentData) as {data: {
-          clientsSecret:string
-      }};
-    
-      if(!paymentIntent.data.clientsSecret) return 
+      const paymentIntent = (await createPaymentIntents(
+        createPaymentIntentData
+      )) as {
+        data: {
+          clientsSecret: string;
+        };
+      };
 
-      console.log(paymentIntent.data.clientsSecret)
+      if (!paymentIntent.data.clientsSecret) return;
 
-      setLoading(false)
-    } catch (error) {
-        setError('qualcosa è andato storto')
+      // confermo pagamento
+      const confirmPayment = await stripe.confirmCardPayment(paymentIntent.data.clientsSecret, {
+        payment_method,
+        save_payment_method: save,
+      });
+      // controllo se andato a buon fine
+      if(confirmPayment?.error?.message){
+        setError(confirmPayment.error.message)
         setLoading(false)
-
         return false
+      }
+
+      if(confirmPayment.paymentIntent?.status === 'succeeded'){
+        setLoading(false);
+        return true
+      }
+
+      return false;
+      
+    } catch (error) {
+      setError("qualcosa è andato storto");
+      setLoading(false);
+
+      return false;
     }
   };
-  return {completePayment,loading,error}
+  return { completePayment, loading, error };
 };

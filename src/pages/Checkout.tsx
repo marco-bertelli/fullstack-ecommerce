@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { CardElement, useElements } from "@stripe/react-stripe-js";
+import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { StripeCardElementChangeEvent } from "@stripe/stripe-js";
 import React, { useRef, useState } from "react";
 import { useEffect } from "react";
@@ -10,7 +10,7 @@ import Spinner from "../components/Spinner";
 import { calculateCartAmount, calculateCartQuantity } from "../helpers";
 import { useCheckout } from "../hooks/useCheckout";
 import { useCartContext } from "../state/CartContext";
-import { Address, CreatePaymentIntentData } from "../types";
+import { Address, CreatePaymentIntentData, PaymentMethod } from "../types";
 
 interface Props {}
 
@@ -21,13 +21,14 @@ const Checkout: React.FC<Props> = () => {
   }>();
   const [useNewCard, setUseNewCard] = useState(false);
   const [disabled, setDisabled] = useState(true);
-  const [NewCardError, setNewCardError] = useState('');
-  const [address, setAddress] = useState<Address | null>(null)
-  const [loadAddress, setLoadAddress] = useState(true)
+  const [NewCardError, setNewCardError] = useState("");
+  const [address, setAddress] = useState<Address | null>(null);
+  const [loadAddress, setLoadAddress] = useState(true);
 
   const { cart } = useCartContext();
-  const {completePayment, loading, error} = useCheckout()
-  const elements = useElements()
+  const { completePayment, loading, error } = useCheckout();
+  const elements = useElements();
+  const stripe = useStripe();
 
   const btnRef = useRef<HTMLButtonElement>(null);
 
@@ -46,56 +47,68 @@ const Checkout: React.FC<Props> = () => {
   }, [cart]);
 
   useEffect(() => {
-    const addressData=window.localStorage.getItem('shippingAddress')
-    if(!addressData) {
-      setLoadAddress(false)
-      return
-    } 
+    const addressData = window.localStorage.getItem("shippingAddress");
+    if (!addressData) {
+      setLoadAddress(false);
+      return;
+    }
 
-    const address = JSON.parse(addressData)
-    setAddress(address)
-    setLoadAddress(false)
-
-  },[setAddress,setLoadAddress])
+    const address = JSON.parse(addressData);
+    setAddress(address);
+    setLoadAddress(false);
+  }, [setAddress, setLoadAddress]);
 
   const handleClickBtn = () => {
     if (btnRef && btnRef.current) btnRef.current.click();
   };
 
   const handleCompletePayment = handleSubmit(async (data) => {
-    if(!elements || !orderSummary) return;
-    
-    if(useNewCard) {
-      // New card 
-      const cardElement = elements.getElement(CardElement)
-      if(!cardElement) return 
+    if (!elements || !orderSummary || !stripe) return;
 
-      if(typeof data.save === 'boolean'){
-        if(!data.save){
-           // new card -to save 
-           //get a client secre con la cloud functions
-           const createPaymentIntentData: CreatePaymentIntentData = {
-              amount: orderSummary.amount
-           }
-           return completePayment(createPaymentIntentData)
+    if (useNewCard) {
+      // New card
+      const cardElement = elements.getElement(CardElement);
+      if (!cardElement) return;
 
+      if (typeof data.save === "boolean") {
+        if (!data.save) {
+          // new card -to save
+          //get a client secre con la cloud functions
+          const createPaymentIntentData: CreatePaymentIntentData = {
+            amount: orderSummary.amount,
+          };
+          //preparo metodo pagamento
+          const payment_method: PaymentMethod = {
+            card: cardElement,
+            billing_details: { name: data.cardName },
+          };
+
+          const finished = await completePayment(
+            createPaymentIntentData,
+            stripe,
+            payment_method,
+            data.save
+          );
+
+          if(finished){
+            alert('Pagemnto completato')
+          }
         } else {
           //new card not save
-
         }
       }
     }
     //carta esistente
   });
 
-  const handleCardChange = (e: StripeCardElementChangeEvent) =>{
-    setDisabled(e.empty || !e.complete)
-    setNewCardError(e.error ? e.error.message : '')
+  const handleCardChange = (e: StripeCardElementChangeEvent) => {
+    setDisabled(e.empty || !e.complete);
+    setNewCardError(e.error ? e.error.message : "");
 
-    if(e.complete) setNewCardError('')
-  }
+    if (e.complete) setNewCardError("");
+  };
 
-  if(loadAddress) return <Spinner color='grey' width={50} height={50} />
+  if (loadAddress) return <Spinner color="grey" width={50} height={50} />;
   if (!address) return <Redirect to="/buy/select-address" />;
 
   const { fullname, address1, address2, city, zipCode, phone } = address;
@@ -113,7 +126,7 @@ const Checkout: React.FC<Props> = () => {
                 name="card"
                 value="new-card"
                 style={{ width: "10%" }}
-                onClick={()=>setUseNewCard(true)}
+                onClick={() => setUseNewCard(true)}
               />
 
               <h4
@@ -175,7 +188,9 @@ const Checkout: React.FC<Props> = () => {
                   }}
                   onChange={handleCardChange}
                 />
-                {NewCardError && <p className='paragarph paragraph--error'>{NewCardError}</p>}
+                {NewCardError && (
+                  <p className="paragarph paragraph--error">{NewCardError}</p>
+                )}
               </div>
 
               <div className="form__set-new-card">
@@ -196,6 +211,7 @@ const Checkout: React.FC<Props> = () => {
                 </div>
               </div>
             </div>
+            {error && <p className="paragraph paragraph--error">{error}</p>}
           </div>
           <button ref={btnRef} style={{ display: "none" }}></button>
         </form>
@@ -237,7 +253,7 @@ const Checkout: React.FC<Props> = () => {
           <Button
             onClick={handleClickBtn}
             width="100%"
-            disabled={!useNewCard || disabled || loading}
+            disabled={!stripe || !useNewCard || disabled || loading}
             className="btn--orange btn--payment"
             loading={loading}
           >

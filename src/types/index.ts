@@ -1,3 +1,4 @@
+import { CreatePaymentMethodCardData } from "@stripe/stripe-js";
 import { firebase } from "../firebase/config";
 
 export type AuthUser = firebase.User;
@@ -68,18 +69,26 @@ export type CartItem = {
   product: string;
   quantity: number;
   user: string;
-  item: Product
+  item: Product;
   createdAt: firebase.firestore.Timestamp;
   updatedAt?: firebase.firestore.Timestamp;
 };
 
-export type UploadCartItem = Omit<CartItem, 'id' | 'item' | 'createdAt' | 'updatedAt'> & {
-  createdAt: firebase.firestore.FieldValue
-  updatedAt?: firebase.firestore.FieldValue
-}
+export type UploadCartItem = Omit<
+  CartItem,
+  "id" | "item" | "createdAt" | "updatedAt"
+> & {
+  createdAt: firebase.firestore.FieldValue;
+  updatedAt?: firebase.firestore.FieldValue;
+};
 
 export type CreatePaymentIntentData = {
   amount: number;
   customer?: string;
   paymentMethod?: string;
-}
+};
+
+export type PaymentMethod =
+  | string
+  | Pick<CreatePaymentMethodCardData, "card"
+  | "billing_details" | "metadata" | "payment_method" >
