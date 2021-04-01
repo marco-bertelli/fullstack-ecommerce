@@ -9,6 +9,7 @@ import Button from "../components/Button";
 import Spinner from "../components/Spinner";
 import { calculateCartAmount, calculateCartQuantity } from "../helpers";
 import { useCheckout } from "../hooks/useCheckout";
+import { useAuthContext } from "../state/auth-context";
 import { useCartContext } from "../state/CartContext";
 import { Address, CreatePaymentIntentData, PaymentMethod } from "../types";
 
@@ -26,6 +27,7 @@ const Checkout: React.FC<Props> = () => {
   const [loadAddress, setLoadAddress] = useState(true);
 
   const { cart } = useCartContext();
+  const {authState: {userInfo}} = useAuthContext();
   const { completePayment, loading, error } = useCheckout();
   const elements = useElements();
   const stripe = useStripe();
@@ -63,7 +65,7 @@ const Checkout: React.FC<Props> = () => {
   };
 
   const handleCompletePayment = handleSubmit(async (data) => {
-    if (!elements || !orderSummary || !stripe) return;
+    if (!elements || !orderSummary || !stripe || !userInfo) return;
 
     if (useNewCard) {
       // New card
@@ -95,6 +97,13 @@ const Checkout: React.FC<Props> = () => {
           }
         } else {
           //new card not save
+          if(!userInfo.stripeCustomerId){
+            //utente non ha stripe id 
+
+          } else {
+             //utente ha stripe id la salvo li 
+
+          }
         }
       }
     }
