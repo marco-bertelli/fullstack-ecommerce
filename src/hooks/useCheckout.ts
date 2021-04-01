@@ -31,24 +31,26 @@ export const useCheckout = () => {
       if (!paymentIntent.data.clientsSecret) return;
 
       // confermo pagamento
-      const confirmPayment = await stripe.confirmCardPayment(paymentIntent.data.clientsSecret, {
-        payment_method,
-        save_payment_method: save,
-      });
+      const confirmPayment = await stripe.confirmCardPayment(
+        paymentIntent.data.clientsSecret,
+        {
+          payment_method,
+          save_payment_method: save,
+        }
+      );
       // controllo se andato a buon fine
-      if(confirmPayment?.error?.message){
-        setError(confirmPayment.error.message)
-        setLoading(false)
-        return false
+      if (confirmPayment?.error?.message) {
+        setError(confirmPayment.error.message);
+        setLoading(false);
+        return false;
       }
 
-      if(confirmPayment.paymentIntent?.status === 'succeeded'){
+      if (confirmPayment.paymentIntent?.status === "succeeded") {
         setLoading(false);
-        return true
+        return true;
       }
 
       return false;
-      
     } catch (error) {
       setError("qualcosa è andato storto");
       setLoading(false);
@@ -56,5 +58,26 @@ export const useCheckout = () => {
       return false;
     }
   };
-  return { completePayment, loading, error };
+
+  const createStripeCustomerId = async () => {
+    try {
+      setLoading(true);
+      const createStripeCustomer = functions.httpsCallable(
+        "createStripeCustomer"
+      );
+
+      const stripeCustomerData = (await createStripeCustomer()) as {
+        data: { customerId: string };
+      };
+      
+      return stripeCustomerData.data.customerId;
+    } catch (error) {
+      
+      setError(error);
+      setLoading(false);
+
+      return undefined;
+    }
+  };
+  return { completePayment, createStripeCustomerId, loading, error };
 };

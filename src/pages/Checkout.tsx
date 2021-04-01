@@ -27,8 +27,15 @@ const Checkout: React.FC<Props> = () => {
   const [loadAddress, setLoadAddress] = useState(true);
 
   const { cart } = useCartContext();
-  const {authState: {userInfo}} = useAuthContext();
-  const { completePayment, loading, error } = useCheckout();
+  const {
+    authState: { userInfo },
+  } = useAuthContext();
+  const {
+    completePayment,
+    createStripeCustomerId,
+    loading,
+    error,
+  } = useCheckout();
   const elements = useElements();
   const stripe = useStripe();
 
@@ -73,37 +80,38 @@ const Checkout: React.FC<Props> = () => {
       if (!cardElement) return;
 
       if (typeof data.save === "boolean") {
-        if (!data.save) {
-          // new card -to save
-          //get a client secre con la cloud functions
-          const createPaymentIntentData: CreatePaymentIntentData = {
-            amount: orderSummary.amount,
-          };
-          //preparo metodo pagamento
-          const payment_method: PaymentMethod = {
-            card: cardElement,
-            billing_details: { name: data.cardName },
-          };
-
-          const finished = await completePayment(
-            createPaymentIntentData,
-            stripe,
-            payment_method,
-            data.save
-          );
-
-          if(finished){
-            alert('Pagemnto completato')
-          }
-        } else {
+        // new card -to save
+        //get a client secre con la cloud functions
+        const createPaymentIntentData: CreatePaymentIntentData = {
+          amount: orderSummary.amount,
+        };
+        //preparo metodo pagamento
+        const payment_method: PaymentMethod = {
+          card: cardElement,
+          billing_details: { name: data.cardName },
+        };
+        if (data.save) {
           //new card not save
-          if(!userInfo.stripeCustomerId){
-            //utente non ha stripe id 
-
+          if (!userInfo.stripeCustomerId) {
+            //utente non ha stripe id
+            const stripeCustomerId = await createStripeCustomerId();
+            createPaymentIntentData.customer = stripeCustomerId;
           } else {
-             //utente ha stripe id la salvo li 
+            //utente ha stripe id la salvo li
+            createPaymentIntentData.customer = userInfo.stripeCustomerId;
 
           }
+        }
+        
+        const finished = await completePayment(
+          createPaymentIntentData,
+          stripe,
+          payment_method,
+          data.save
+        );
+
+        if (finished) {
+          alert("Pagemnto completato");
         }
       }
     }
