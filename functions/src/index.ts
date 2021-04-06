@@ -196,3 +196,16 @@ export const createStripeCustomer = functions.https.onCall(
 
       return {customerId: customer.id};
     });
+
+export const setDefaultCard = functions.https.onCall(
+    async (data, context) => {
+      if (!context.auth) throw new Error("Non autenticato");
+
+      const {customerId, paymentMethod} = data as {
+        customerId: string; paymentMethod: string
+      };
+
+      return stripe.customers.update(customerId, {invoice_settings: {
+        default_payment_method: paymentMethod,
+      }});
+    });
