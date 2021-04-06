@@ -99,15 +99,16 @@ const Checkout: React.FC<Props> = () => {
           } else {
             //utente ha stripe id la salvo li
             createPaymentIntentData.customer = userInfo.stripeCustomerId;
-
           }
         }
-        
+
         const finished = await completePayment(
-          createPaymentIntentData,
-          stripe,
-          payment_method,
-          data.save
+          { createPaymentIntentData, stripe, payment_method },
+          {
+            save: data.save,
+            setDefault: data.setDefault,
+            customerId: createPaymentIntentData.customer,
+          }
         );
 
         if (finished) {

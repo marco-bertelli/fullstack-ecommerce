@@ -7,11 +7,19 @@ export const useCheckout = () => {
   const { loading, setLoading, error, setError } = useAsyncCall();
 
   const completePayment = async (
+   paymentData :{
     createPaymentIntentData: CreatePaymentIntentData,
     stripe: Stripe,
-    payment_method: PaymentMethod,
-    save: boolean | undefined
+    payment_method: PaymentMethod
+   },
+    options :{ 
+      save: boolean | undefined
+      setDefault: boolean | undefined
+      customerId?: string
+    } 
   ) => {
+    const {createPaymentIntentData,stripe, payment_method} = paymentData;
+    const {save, setDefault, customerId} = options
     try {
       setLoading(true);
 
@@ -46,13 +54,23 @@ export const useCheckout = () => {
       }
 
       if (confirmPayment.paymentIntent?.status === "succeeded") {
+        if (setDefault) {
+
+          const setDefaultCard = functions.httpsCallable("setDefaultCard")
+        
+          await setDefaultCard({
+            customerId,
+            paymentMethod: confirmPayment.paymentIntent?.payment_method
+          })
+          console.log("carta settata come default")
+        }
         setLoading(false);
         return true;
       }
 
       return false;
     } catch (error) {
-      setError("qualcosa è andato storto");
+      setError(error);
       setLoading(false);
 
       return false;
