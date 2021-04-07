@@ -12,7 +12,11 @@ import { useCheckout } from "../hooks/useCheckout";
 import { useFetchCards } from "../hooks/useFetchCards";
 import { useAuthContext } from "../state/auth-context";
 import { useCartContext } from "../state/CartContext";
-import { Address, CreatePaymentIntentData, CreatePaymentMethod } from "../types";
+import {
+  Address,
+  CreatePaymentIntentData,
+  CreatePaymentMethod,
+} from "../types";
 
 interface Props {}
 
@@ -41,8 +45,7 @@ const Checkout: React.FC<Props> = () => {
     userCards,
     stripeCustomer,
     loading: fetchCardsLoading,
-    error: fetchCardsError,
-    fetchCards,
+    error: fetchCardsError
   } = useFetchCards(userInfo);
 
   const elements = useElements();
@@ -145,107 +148,168 @@ const Checkout: React.FC<Props> = () => {
       <div className="payment">
         <h2 className="header">Seleziona un metodo di pagamento</h2>
 
-        {fetchCardsLoading ? <Spinner color="grey" width={30} height={30} /> :
-        <form className="form" onSubmit={handleCompletePayment}>
-          <div className="form--new-card">
-            <label htmlFor="newCard" className="card card--new">
-              <input
-                type="radio"
-                name="card"
-                value="new-card"
-                style={{ width: "10%" }}
-                onClick={() => setUseNewCard(true)}
-              />
+        {fetchCardsLoading ? (
+          <Spinner color="grey" width={30} height={30} />
+        ) : (
+          <form className="form" onSubmit={handleCompletePayment}>
+            {userCards?.data &&
+              userCards.data.length > 0 &&
+              userCards.data.map((method) => (
+                <label key={method.id} className="card" htmlFor={method.id}>
+                  <input
+                    type="radio"
+                    name="card"
+                    value={method.id}
+                    style={{ width: "10%" }}
+                  />
 
-              <h4
-                className="paragraph paragraph--bold"
-                style={{ width: "30%" }}
-              >
-                Usa una nuova carta
-              </h4>
-              <p className="paragraph" style={{ width: "5%" }}></p>
-
-              <div className="new-card__logo" style={{ width: "45%" }}>
-                <FontAwesomeIcon
-                  icon={["fab", "cc-visa"]}
-                  size="1x"
-                  style={{ margin: "0 0.5rem" }}
-                  color="#206CAB"
-                />
-                <FontAwesomeIcon
-                  icon={["fab", "cc-mastercard"]}
-                  size="1x"
-                  style={{ margin: "0 0.5rem" }}
-                  color="red"
-                />
-                <FontAwesomeIcon
-                  icon={["fab", "cc-amex"]}
-                  size="1x"
-                  style={{ margin: "0 0.5rem" }}
-                  color="light-blue"
-                />
-              </div>
-              <p className="paragraph" style={{ width: "10%" }}></p>
-            </label>
-
-            <div className="new-card__form">
-              <div className="form__input-container form__input-container--card">
-                <input
-                  type="text"
-                  className="input input--card-name"
-                  name="cardName"
-                  placeholder="nome titolare "
-                  ref={register({
-                    required: "titolare della carta obbligatorio",
-                  })}
-                />
-
-                {errors.cardName && (
-                  <p className="paragraph paragraph--small paragraph--error">
-                    {errors.cardName.message}
+                  <p className="paragraph" style={{ width: "40%" }}>
+                    **** **** **** {method.card?.last4}
                   </p>
-                )}
-              </div>
-              <div className="form__input-container form__input-container--card">
-                <CardElement
-                  options={{
-                    style: {
-                      base: { color: "blue", iconColor: "blue" },
-                      invalid: { color: "red", iconColor: "red" },
-                    },
-                  }}
-                  onChange={handleCardChange}
+
+                  <p
+                    className="paragraph--center paragraph--focus"
+                    style={{ width: "10%" }}
+                  >
+                    {method.card?.brand === "visa" ? (
+                      <FontAwesomeIcon
+                        icon={["fab", "cc-visa"]}
+                        size="2x"
+                        color="#206CAB"
+                      />
+                    ) : method.card?.brand === "mastercard" ? (
+                      <FontAwesomeIcon
+                        icon={["fab", "cc-mastercard"]}
+                        size="2x"
+                        color="red"
+                      />
+                    ) : method.card?.brand === "amex" ? (
+                      <FontAwesomeIcon
+                        icon={["fab", "cc-amex"]}
+                        size="2x"
+                        color="light-blue"
+                      />
+                    ) : (
+                      method.card?.brand
+                    )}
+                  </p>
+
+                  <div style={{width:'30%'}}>
+                    {method.id === stripeCustomer?.invoice_settings.default_payment_method ? (
+                      <p className='paragraph--center paragraph--focus'>Default</p>
+                    ) : <div>
+                      <input type="checkbox" name='setDefault' />
+                      <label htmlFor="setDefault" className="set-default-card">Imposta Come predefinita</label>
+                    </div>}
+                  </div>
+
+                  <p className="paragraph" style={{width:'10%'}}>
+                    <FontAwesomeIcon icon={['fas', 'trash']} size='1x' color='red' />
+                  </p>
+                </label>
+              ))}
+
+            <div className="form--new-card">
+              <label htmlFor="newCard" className="card card--new">
+                <input
+                  type="radio"
+                  name="card"
+                  value="new-card"
+                  style={{ width: "10%" }}
+                  onClick={() => setUseNewCard(true)}
                 />
-                {NewCardError && (
-                  <p className="paragarph paragraph--error">{NewCardError}</p>
-                )}
-              </div>
 
-              <div className="form__set-new-card">
-                <div className="form__input-container">
-                  <input type="checkbox" name="save" ref={register} />
-                  <label htmlFor="saveCard" className="paragraph">
-                    Salva questa carta
-                  </label>
+                <h4
+                  className="paragraph paragraph--bold"
+                  style={{ width: "30%" }}
+                >
+                  Usa una nuova carta
+                </h4>
+                <p className="paragraph" style={{ width: "5%" }}></p>
+
+                <div className="new-card__logo" style={{ width: "45%" }}>
+                  <FontAwesomeIcon
+                    icon={["fab", "cc-visa"]}
+                    size="1x"
+                    style={{ margin: "0 0.5rem" }}
+                    color="#206CAB"
+                  />
+                  <FontAwesomeIcon
+                    icon={["fab", "cc-mastercard"]}
+                    size="1x"
+                    style={{ margin: "0 0.5rem" }}
+                    color="red"
+                  />
+                  <FontAwesomeIcon
+                    icon={["fab", "cc-amex"]}
+                    size="1x"
+                    style={{ margin: "0 0.5rem" }}
+                    color="light-blue"
+                  />
+                </div>
+                <p className="paragraph" style={{ width: "10%" }}></p>
+              </label>
+
+              <div className="new-card__form">
+                <div className="form__input-container form__input-container--card">
+                  <input
+                    type="text"
+                    className="input input--card-name"
+                    name="cardName"
+                    placeholder="nome titolare "
+                    ref={register({
+                      required: "titolare della carta obbligatorio",
+                    })}
+                  />
+
+                  {errors.cardName && (
+                    <p className="paragraph paragraph--small paragraph--error">
+                      {errors.cardName.message}
+                    </p>
+                  )}
+                </div>
+                <div className="form__input-container form__input-container--card">
+                  <CardElement
+                    options={{
+                      style: {
+                        base: { color: "blue", iconColor: "blue" },
+                        invalid: { color: "red", iconColor: "red" },
+                      },
+                    }}
+                    onChange={handleCardChange}
+                  />
+                  {NewCardError && (
+                    <p className="paragarph paragraph--error">{NewCardError}</p>
+                  )}
+                </div>
+
+                <div className="form__set-new-card">
+                  <div className="form__input-container">
+                    <input type="checkbox" name="save" ref={register} />
+                    <label htmlFor="saveCard" className="paragraph">
+                      Salva questa carta
+                    </label>
+                  </div>
+                </div>
+
+                <div className="form__set-new-card">
+                  <div className="form__input-container">
+                    <input type="checkbox" name="setDefault" ref={register} />
+                    <label htmlFor="setDefault" className="paragraph">
+                      Imposta come predefinita
+                    </label>
+                  </div>
                 </div>
               </div>
-
-              <div className="form__set-new-card">
-                <div className="form__input-container">
-                  <input type="checkbox" name="setDefault" ref={register} />
-                  <label htmlFor="setDefault" className="paragraph">
-                    Imposta come predefinita
-                  </label>
-                </div>
-              </div>
+              {error && <p className="paragraph paragraph--error">{error}</p>}
             </div>
-            {error && <p className="paragraph paragraph--error">{error}</p>}
-          </div>
-          <button ref={btnRef} style={{ display: "none" }}></button>
-        </form>
-        }
+            <button ref={btnRef} style={{ display: "none" }}></button>
+          </form>
+        )}
 
-        {fetchCardsError && <p className="paragraph paragraph--error">{fetchCardsError}</p>}
+        {fetchCardsError && (
+          <p className="paragraph paragraph--error">{fetchCardsError}</p>
+        )}
       </div>
 
       <div className="summary">
