@@ -9,9 +9,10 @@ import Button from "../components/Button";
 import Spinner from "../components/Spinner";
 import { calculateCartAmount, calculateCartQuantity } from "../helpers";
 import { useCheckout } from "../hooks/useCheckout";
+import { useFetchCards } from "../hooks/useFetchCards";
 import { useAuthContext } from "../state/auth-context";
 import { useCartContext } from "../state/CartContext";
-import { Address, CreatePaymentIntentData, PaymentMethod } from "../types";
+import { Address, CreatePaymentIntentData, CreatePaymentMethod } from "../types";
 
 interface Props {}
 
@@ -36,6 +37,14 @@ const Checkout: React.FC<Props> = () => {
     loading,
     error,
   } = useCheckout();
+  const {
+    userCards,
+    stripeCustomer,
+    loading: fetchCardsLoading,
+    error: fetchCardsError,
+    fetchCards,
+  } = useFetchCards(userInfo);
+
   const elements = useElements();
   const stripe = useStripe();
 
@@ -86,7 +95,7 @@ const Checkout: React.FC<Props> = () => {
           amount: orderSummary.amount,
         };
         //preparo metodo pagamento
-        const payment_method: PaymentMethod = {
+        const payment_method: CreatePaymentMethod = {
           card: cardElement,
           billing_details: { name: data.cardName },
         };
@@ -136,6 +145,7 @@ const Checkout: React.FC<Props> = () => {
       <div className="payment">
         <h2 className="header">Seleziona un metodo di pagamento</h2>
 
+        {fetchCardsLoading ? <Spinner color="grey" width={30} height={30} /> :
         <form className="form" onSubmit={handleCompletePayment}>
           <div className="form--new-card">
             <label htmlFor="newCard" className="card card--new">
@@ -233,6 +243,9 @@ const Checkout: React.FC<Props> = () => {
           </div>
           <button ref={btnRef} style={{ display: "none" }}></button>
         </form>
+        }
+
+        {fetchCardsError && <p className="paragraph paragraph--error">{fetchCardsError}</p>}
       </div>
 
       <div className="summary">
