@@ -209,3 +209,17 @@ export const setDefaultCard = functions.https.onCall(
         default_payment_method: paymentMethod,
       }});
     });
+
+export const listPaymentMethods = functions.https.onCall(
+    async (data, context) => {
+      if (!context.auth) throw new Error("Non autenticato");
+
+      const {customerId} = data as {customerId: string};
+      // query per ottenere carte
+      const paymentMethods = await stripe.paymentMethods.list(
+          {customer: customerId, type: "card"}
+      );
+      const customer = await stripe.customers.retrieve(customerId);
+
+      return {paymentMethods, customer};
+    });
