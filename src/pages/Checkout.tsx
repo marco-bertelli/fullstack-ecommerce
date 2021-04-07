@@ -141,10 +141,36 @@ const Checkout: React.FC<Props> = () => {
 
         if (finished) {
           alert("Pagemnto completato");
+          reset()
         }
       }
+    } else if (useCard.type === 'saved' && useCard.payment_method) {
+      //carta esistente
+
+      //get a client secre con la cloud functions
+      const createPaymentIntentData: CreatePaymentIntentData = {
+        amount: orderSummary.amount,
+        customer: stripeCustomer?.id,
+        paymentMethod: useCard.payment_method
+      };
+      //preparo metodo pagamento
+      const payment_method: CreatePaymentMethod = useCard.payment_method
+
+      const finished = await completePayment(
+        { createPaymentIntentData, stripe, payment_method },
+        {
+          save: data.save,
+          setDefault: data.setDefault,
+          customerId: stripeCustomer?.id
+        }
+      );
+
+      if (finished) {
+        alert("Pagemnto completato");
+        reset()
+      }
     }
-    //carta esistente
+    
   });
 
   const handleCardChange = (e: StripeCardElementChangeEvent) => {
