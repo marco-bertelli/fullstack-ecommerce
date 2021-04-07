@@ -4,6 +4,8 @@ import { useHistory } from "react-router-dom";
 import { Address } from "../../types";
 import Button from "../Button";
 
+export const address_key = 'shippingAddress';
+
 interface Props {
   address: Address;
   setAddressToEdit: (address: Address | null) => void;
@@ -35,7 +37,7 @@ const ShippingAddress: React.FC<Props> = ({
         className="btn--orange"
         style={{ margin: "1rem 0" }}
         onClick={() => {
-          window.localStorage.setItem('shippingAddress', JSON.stringify(address))
+          window.localStorage.setItem(address_key, JSON.stringify(address))
           history.push({ pathname: "/buy/checkout" });
         }}
       >

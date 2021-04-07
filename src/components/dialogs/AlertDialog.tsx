@@ -10,6 +10,7 @@ interface Props {
   onCancel?: () => void;
   loading?: boolean;
   error?: string;
+  confirmText?: string
 }
 
 const AlertDialog: React.FC<Props> = ({
@@ -19,6 +20,7 @@ const AlertDialog: React.FC<Props> = ({
   onConfirm,
   loading,
   error,
+  confirmText
 }) => {
   return (
     <DialogWrapper
@@ -44,7 +46,7 @@ const AlertDialog: React.FC<Props> = ({
               loading={loading}
               disabled={loading}
             >
-              Confirm
+              {confirmText ? confirmText : 'Confirm'}
             </Button>
           )}
         </div>

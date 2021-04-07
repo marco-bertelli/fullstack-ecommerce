@@ -4,11 +4,14 @@ import { StripeCardElementChangeEvent } from "@stripe/stripe-js";
 import React, { useRef, useState } from "react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { Redirect } from "react-router-dom";
+import { Redirect, useHistory } from "react-router-dom";
 import Button from "../components/Button";
+import AlertDialog from "../components/dialogs/AlertDialog";
+import { address_key } from "../components/select-adress/ShippingAddress";
 import Spinner from "../components/Spinner";
 import { calculateCartAmount, calculateCartQuantity } from "../helpers";
 import { useCheckout } from "../hooks/useCheckout";
+import { useDialog } from "../hooks/useDialog";
 import { useFetchCards } from "../hooks/useFetchCards";
 import { useAuthContext } from "../state/auth-context";
 import { useCartContext } from "../state/CartContext";
@@ -35,9 +38,10 @@ const Checkout: React.FC<Props> = () => {
   const [NewCardError, setNewCardError] = useState("");
   const [address, setAddress] = useState<Address | null>(null);
   const [loadAddress, setLoadAddress] = useState(true);
-  const [openSetDefault, setOpenSetDefault] = useState(false)
+  const [openSetDefault, setOpenSetDefault] = useState(false);
 
   const { cart } = useCartContext();
+  const history = useHistory();
   const {
     authState: { userInfo },
   } = useAuthContext();
@@ -53,6 +57,8 @@ const Checkout: React.FC<Props> = () => {
     loading: fetchCardsLoading,
     error: fetchCardsError,
   } = useFetchCards(userInfo);
+
+  const { openDialog, setOpenDialog } = useDialog();
 
   const elements = useElements();
   const stripe = useStripe();
@@ -70,7 +76,7 @@ const Checkout: React.FC<Props> = () => {
       setOrderSummary({
         quantity: calculateCartQuantity(cart),
         amount: calculateCartAmount(cart),
-        orderItems: cart
+        orderItems: cart,
       });
   }, [cart]);
 
@@ -83,12 +89,12 @@ const Checkout: React.FC<Props> = () => {
           userCards.data[0].id,
       });
       setDisabled(false);
-      reset()
+      reset();
     }
-  }, [userCards?.data, stripeCustomer,reset]);
+  }, [userCards?.data, stripeCustomer, reset]);
 
   useEffect(() => {
-    const addressData = window.localStorage.getItem("shippingAddress");
+    const addressData = window.localStorage.getItem(address_key);
     if (!addressData) {
       setLoadAddress(false);
       return;
@@ -106,14 +112,18 @@ const Checkout: React.FC<Props> = () => {
   const handleCompletePayment = handleSubmit(async (data) => {
     if (!elements || !orderSummary || !stripe || !userInfo || !address) return;
 
-    const {amount, quantity, orderItems} = orderSummary
+    const { amount, quantity, orderItems } = orderSummary;
     const newOrder: UploadOrder = {
-      items: orderItems.map(({quantity, user, item})=>({quantity, user, item})),
+      items: orderItems.map(({ quantity, user, item }) => ({
+        quantity,
+        user,
+        item,
+      })),
       amount,
-      totalQuantity:quantity,
+      totalQuantity: quantity,
       shippingAddress: address,
-      user:{id:userInfo.id,name:userInfo.username}
-    }
+      user: { id: userInfo.id, name: userInfo.username },
+    };
 
     if (useCard.type === "new") {
       // New card
@@ -155,39 +165,38 @@ const Checkout: React.FC<Props> = () => {
         );
 
         if (finished) {
-          alert("Pagemnto completato");
-          reset()
+          setOpenDialog(true)
+          reset();
         }
       }
-    } else if (useCard.type === 'saved' && useCard.payment_method) {
+    } else if (useCard.type === "saved" && useCard.payment_method) {
       //carta esistente
 
       //get a client secre con la cloud functions
       const createPaymentIntentData: CreatePaymentIntentData = {
         amount: orderSummary.amount,
         customer: stripeCustomer?.id,
-        paymentMethod: useCard.payment_method
+        paymentMethod: useCard.payment_method,
       };
       //preparo metodo pagamento
-      const payment_method: CreatePaymentMethod = useCard.payment_method
+      const payment_method: CreatePaymentMethod = useCard.payment_method;
 
       const finished = await completePayment(
         { createPaymentIntentData, stripe, payment_method },
         {
           save: data.save,
           setDefault: data.setDefault,
-          customerId: stripeCustomer?.id
+          customerId: stripeCustomer?.id,
         },
         newOrder,
         orderItems
       );
 
       if (finished) {
-        alert("Pagemnto completato");
-        reset()
+        setOpenDialog(true)
+        reset();
       }
     }
-    
   });
 
   const handleCardChange = (e: StripeCardElementChangeEvent) => {
@@ -227,7 +236,7 @@ const Checkout: React.FC<Props> = () => {
                     onClick={() => {
                       setUseCard({ type: "saved", payment_method: method.id });
                       setDisabled(false);
-                      reset()
+                      reset();
                     }}
                   />
 
@@ -271,7 +280,11 @@ const Checkout: React.FC<Props> = () => {
                     ) : useCard.type === "saved" &&
                       useCard.payment_method === method.id ? (
                       <div>
-                        <input type="checkbox" name="setDefault" ref={register}/>
+                        <input
+                          type="checkbox"
+                          name="setDefault"
+                          ref={register}
+                        />
                         <label
                           htmlFor="setDefault"
                           className="set-default-card"
@@ -303,7 +316,7 @@ const Checkout: React.FC<Props> = () => {
                   onClick={() => {
                     setUseCard({ type: "new" });
                     setDisabled(true);
-                    reset()
+                    reset();
                   }}
                 />
 
@@ -337,64 +350,77 @@ const Checkout: React.FC<Props> = () => {
                 </div>
                 <p className="paragraph" style={{ width: "10%" }}></p>
               </label>
-              {useCard.type === 'new' &&
-              <div className="new-card__form">
-                <div className="form__input-container form__input-container--card">
-                  <input
-                    type="text"
-                    className="input input--card-name"
-                    name="cardName"
-                    placeholder="nome titolare "
-                    ref={register({
-                      required: "titolare della carta obbligatorio",
-                    })}
-                  />
+              {useCard.type === "new" && (
+                <div className="new-card__form">
+                  <div className="form__input-container form__input-container--card">
+                    <input
+                      type="text"
+                      className="input input--card-name"
+                      name="cardName"
+                      placeholder="nome titolare "
+                      ref={register({
+                        required: "titolare della carta obbligatorio",
+                      })}
+                    />
 
-                  {errors.cardName && (
-                    <p className="paragraph paragraph--small paragraph--error">
-                      {errors.cardName.message}
-                    </p>
+                    {errors.cardName && (
+                      <p className="paragraph paragraph--small paragraph--error">
+                        {errors.cardName.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="form__input-container form__input-container--card">
+                    <CardElement
+                      options={{
+                        style: {
+                          base: { color: "blue", iconColor: "blue" },
+                          invalid: { color: "red", iconColor: "red" },
+                        },
+                      }}
+                      onChange={handleCardChange}
+                    />
+                    {NewCardError && (
+                      <p className="paragarph paragraph--error">
+                        {NewCardError}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="form__set-new-card">
+                    <div className="form__input-container">
+                      <input
+                        type="checkbox"
+                        name="save"
+                        ref={register}
+                        onClick={() => setOpenSetDefault((prev) => !prev)}
+                      />
+                      <label htmlFor="saveCard" className="paragraph">
+                        Salva questa carta
+                      </label>
+                    </div>
+                  </div>
+
+                  {openSetDefault && (
+                    <div className="form__set-new-card">
+                      <div className="form__input-container">
+                        <input
+                          type="checkbox"
+                          name="setDefault"
+                          ref={register}
+                        />
+                        <label htmlFor="setDefault" className="paragraph">
+                          Imposta come predefinita
+                        </label>
+                      </div>
+                    </div>
                   )}
                 </div>
-                <div className="form__input-container form__input-container--card">
-                  <CardElement
-                    options={{
-                      style: {
-                        base: { color: "blue", iconColor: "blue" },
-                        invalid: { color: "red", iconColor: "red" },
-                      },
-                    }}
-                    onChange={handleCardChange}
-                  />
-                  {NewCardError && (
-                    <p className="paragarph paragraph--error">{NewCardError}</p>
-                  )}
-                </div>
-
-                <div className="form__set-new-card">
-                  <div className="form__input-container">
-                    <input type="checkbox" name="save" ref={register} onClick={()=>setOpenSetDefault(prev =>!prev)} />
-                    <label htmlFor="saveCard" className="paragraph">
-                      Salva questa carta
-                    </label>
-                  </div>
-                </div>
-                
-                {openSetDefault &&
-                <div className="form__set-new-card">
-                  <div className="form__input-container">
-                    <input type="checkbox" name="setDefault" ref={register} />
-                    <label htmlFor="setDefault" className="paragraph">
-                      Imposta come predefinita
-                    </label>
-                  </div>
-                </div>
-                }
-              </div>
-              }
+              )}
             </div>
-            <button ref={btnRef} style={{ display: "none" }}
-            disabled={!stripe || !useCard || disabled || loading}
+            <button
+              ref={btnRef}
+              style={{ display: "none" }}
+              disabled={!stripe || !useCard || disabled || loading}
             ></button>
           </form>
         )}
@@ -449,6 +475,18 @@ const Checkout: React.FC<Props> = () => {
           </Button>
         </div>
       </div>
+
+      {openDialog && (
+        <AlertDialog
+          header="Pagamento confermato"
+          message="pagamento avvenuto con successo clicca ok per vedere l ordine"
+          onConfirm={()=>{
+            setOpenDialog(false)
+            history.replace('/orders/my-orders')
+          }}
+          confirmText='Ok'
+        />
+      )}
     </div>
   );
 };

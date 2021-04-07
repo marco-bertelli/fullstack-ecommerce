@@ -1,5 +1,6 @@
 import { Stripe } from "@stripe/stripe-js";
 import firebase from "firebase";
+import { address_key } from "../components/select-adress/ShippingAddress";
 import { cartRef, ordersRef } from "../firebase";
 import { db, functions } from "../firebase/config";
 import { CartItem, CreatePaymentIntentData, CreatePaymentMethod, UploadOrder } from "../types";
@@ -90,7 +91,7 @@ export const useCheckout = () => {
           })
         })
 
-        
+        window.localStorage.removeItem(address_key)
         setLoading(false);
         return true;
       }
