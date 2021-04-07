@@ -108,7 +108,6 @@ export const useAuthenticate = () => {
   };
 
   //social login
-
   const socialLogin = async (provider: Provider) => {
     try {
       setLoading(true);

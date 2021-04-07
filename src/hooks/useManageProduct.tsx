@@ -65,6 +65,7 @@ export const useManageProduct = () => {
       imageFileName,
       category,
       inventory,
+      path
     } = data;
 
     setLoading(true);
@@ -82,6 +83,7 @@ export const useManageProduct = () => {
       imageFileName: imageFileName,
       imageRef: imagePath,
       creator,
+      path,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
     };
     productsRef
@@ -109,6 +111,7 @@ export const useManageProduct = () => {
       price,
       imageFileName,
       category,
+      path,
       inventory,
     } = data;
 
@@ -126,6 +129,7 @@ export const useManageProduct = () => {
       imageUrl,
       imageFileName: imageFileName,
       imageRef: imagePath,
+      path,
       creator,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
     };

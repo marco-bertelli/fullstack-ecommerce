@@ -48,6 +48,7 @@ export type Product = {
   price: number;
   category: ProductCategory;
   inventory: number;
+  path?: string;
   creator: string;
   createdAt: firebase.firestore.Timestamp;
   updatedAt?: firebase.firestore.Timestamp;
@@ -61,7 +62,7 @@ export type UploadProduct = Omit<Product, "id" | "createdAt" | "updatedAt"> & {
 
 export type AddProductData = Pick<
   Product,
-  "title" | "description" | "price" | "imageFileName" | "category" | "inventory"
+  "title" | "description" | "price" | "imageFileName" | "category" | "inventory" | "path"
 >;
 
 export type CartItem = {

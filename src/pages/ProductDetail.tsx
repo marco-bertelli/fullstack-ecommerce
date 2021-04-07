@@ -38,7 +38,8 @@ const ProductDetail: React.FC<Props> = () => {
 
   //quando params arriva in ingresso trova il singolo
   useEffect(() => {
-    const prod = products.All.find((item) => item.id === params.productId);
+    console.log('/products'+params.productId)
+    const prod = products.All.find((item) => item.path === '/products/'+params.productId);
 
     if (prod) setProduct(prod);
     else setProduct(undefined);

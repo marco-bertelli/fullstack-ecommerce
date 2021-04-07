@@ -223,3 +223,17 @@ export const listPaymentMethods = functions.https.onCall(
 
       return {paymentMethods, customer};
     });
+
+export const detachPaymentMethods = functions.https.onCall(
+    async (data, context) => {
+      if (!context.auth) throw new Error("Non autenticato");
+
+      const {paymentMethod} = data as {paymentMethod: string};
+      // query per ottenere carte
+      const paymentMethodResult = await stripe.paymentMethods.detach(
+          paymentMethod
+      );
+      if (!paymentMethodResult) throw new Error("Qualcosa è andato storto");
+
+      return {paymentMethodResult};
+    });

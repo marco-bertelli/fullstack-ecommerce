@@ -59,6 +59,7 @@ const AddAndEditProduct: React.FC<Props> = ({
       imageFileName,
       category,
       inventory,
+      path,
       imageRef,
       imageUrl,
     } = productToEdit;
@@ -70,7 +71,8 @@ const AddAndEditProduct: React.FC<Props> = ({
       +price === +data.price &&
       imageFileName === data.imageFileName &&
       category === data.category &&
-      +inventory === +data.inventory;
+      +inventory === +data.inventory &&
+      path === data.path;
     //nulla è stato modificato esco
     if (isNotEdited) return;
 
@@ -337,6 +339,16 @@ const AddAndEditProduct: React.FC<Props> = ({
                 message: "solo numeri positivi",
               },
             })}
+            error={errors.inventory?.message}
+          />
+
+          <Input
+            label="Path"
+            type="string"
+            name="path"
+            defaultValue={productToEdit ? productToEdit.path : ""}
+            placeholder="Path per la seo"
+            ref={register}
             error={errors.inventory?.message}
           />
 
