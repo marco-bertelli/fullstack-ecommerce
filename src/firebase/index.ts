@@ -6,6 +6,7 @@ export const usersRef = db.collection('users')
 export const productsRef = db.collection('products')
 export const productCountsRef = db.collection('product-counts')
 export const cartRef = db.collection('cart')
+export const ordersRef = db.collection('orders')
 
 //trasforma uno snaphot in tipo prodotto
 export const snapshotToDoc = <T extends UserInfo | Product | CartItem>(doc: firebase.firestore.DocumentSnapshot<firebase.firestore.DocumentData>) =>{

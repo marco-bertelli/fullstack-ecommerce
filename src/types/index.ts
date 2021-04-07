@@ -82,6 +82,34 @@ export type UploadCartItem = Omit<
   updatedAt?: firebase.firestore.FieldValue;
 };
 
+export type PaymentStatus = 'Success' | 'Refund'
+
+export type ShipmentStatus =
+  | 'New'
+  | 'Preparing'
+  | 'Shipped'
+  | 'Delivered'
+  | 'Canceled'
+
+export type Order = {
+  id: string
+  items: Pick<CartItem, 'quantity' | 'user' | 'item'>[]
+  amount: number
+  totalQuantity: number
+  shippingAddress: Address
+  user: { id: string; name: string }
+  paymentStatus?: PaymentStatus
+  shipmentStatus?: ShipmentStatus
+  createdAt: firebase.firestore.Timestamp
+  updatedAt?: firebase.firestore.Timestamp
+}
+
+// Order type used to upload a document in firestore
+export type UploadOrder = Omit<Order, 'id' | 'createdAt' | 'updatedAt'> & {
+  createdAt?: firebase.firestore.FieldValue
+  updatedAt?: firebase.firestore.FieldValue
+}
+
 export type CreatePaymentIntentData = {
   amount: number;
   customer?: string;

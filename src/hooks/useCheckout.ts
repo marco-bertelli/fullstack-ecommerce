@@ -1,6 +1,8 @@
 import { Stripe } from "@stripe/stripe-js";
-import { functions } from "../firebase/config";
-import { CreatePaymentIntentData, CreatePaymentMethod } from "../types";
+import firebase from "firebase";
+import { cartRef, ordersRef } from "../firebase";
+import { db, functions } from "../firebase/config";
+import { CartItem, CreatePaymentIntentData, CreatePaymentMethod, UploadOrder } from "../types";
 import { useAsyncCall } from "./useAsyncCall";
 
 export const useCheckout = () => {
@@ -16,7 +18,9 @@ export const useCheckout = () => {
       save: boolean | undefined
       setDefault: boolean | undefined
       customerId?: string
-    } 
+    },
+    order:UploadOrder,
+    cart: CartItem[]
   ) => {
     const {createPaymentIntentData,stripe, payment_method} = paymentData;
     const {save, setDefault, customerId} = options
@@ -64,6 +68,29 @@ export const useCheckout = () => {
           })
           console.log("carta settata come default")
         }
+
+        //creo nuovo ordine in firestore
+        const uploadOrder : UploadOrder={
+          ...order,
+          paymentStatus:'Success',
+          shipmentStatus:'New',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }
+
+        await ordersRef.add(uploadOrder).then(()=>{
+          //eliminare il carrello dal firestore
+          cartRef.where('user','==', order.user.id).get().then((snapshots)=>{
+            const batch = db.batch()
+
+            snapshots.forEach(doc => {
+              cart.forEach(item=>item.id === doc.id ? batch.delete(doc.ref) : null)
+            });
+
+            return batch.commit()
+          })
+        })
+
+        
         setLoading(false);
         return true;
       }
