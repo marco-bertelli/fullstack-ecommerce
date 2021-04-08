@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
-import { StripeCardElementChangeEvent } from "@stripe/stripe-js";
+import { PaymentMethod, StripeCardElementChangeEvent } from "@stripe/stripe-js";
 import React, { useRef, useState } from "react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -13,6 +13,7 @@ import { calculateCartAmount, calculateCartQuantity } from "../helpers";
 import { useCheckout } from "../hooks/useCheckout";
 import { useDialog } from "../hooks/useDialog";
 import { useFetchCards } from "../hooks/useFetchCards";
+import { useRemoveCard } from "../hooks/useRemoveCard";
 import { useAuthContext } from "../state/auth-context";
 import { useCartContext } from "../state/CartContext";
 import {
@@ -39,6 +40,8 @@ const Checkout: React.FC<Props> = () => {
   const [address, setAddress] = useState<Address | null>(null);
   const [loadAddress, setLoadAddress] = useState(true);
   const [openSetDefault, setOpenSetDefault] = useState(false);
+  const [cardToDelete, setCardToDelete] = useState<PaymentMethod | null>(null)
+  const [dialogType, setDialogtype] = useState<'inform_payment' | 'remove_card' |null> (null)
 
   const { cart } = useCartContext();
   const history = useHistory();
@@ -57,6 +60,8 @@ const Checkout: React.FC<Props> = () => {
     loading: fetchCardsLoading,
     error: fetchCardsError,
   } = useFetchCards(userInfo);
+
+  const {removeCard, loading: removeCardLoading, error: removeCardError} = useRemoveCard()
 
   const { openDialog, setOpenDialog } = useDialog();
 
@@ -166,6 +171,7 @@ const Checkout: React.FC<Props> = () => {
 
         if (finished) {
           setOpenDialog(true)
+          setDialogtype('inform_payment')
           reset();
         }
       }
@@ -194,6 +200,7 @@ const Checkout: React.FC<Props> = () => {
 
       if (finished) {
         setOpenDialog(true)
+        setDialogtype('inform_payment')
         reset();
       }
     }
@@ -295,7 +302,13 @@ const Checkout: React.FC<Props> = () => {
                     ) : undefined}
                   </div>
 
-                  <p className="paragraph" style={{ width: "10%" }}>
+                  <p className="paragraph" style={{ width: "10%" }}
+                  onClick={() => {
+                    setCardToDelete(method)
+                    setDialogtype('remove_card')
+                    setOpenDialog(true)
+                  }}
+                  >
                     <FontAwesomeIcon
                       icon={["fas", "trash"]}
                       size="1x"
@@ -476,16 +489,40 @@ const Checkout: React.FC<Props> = () => {
         </div>
       </div>
 
-      {openDialog && (
+      {openDialog && dialogType==='inform_payment' && (
         <AlertDialog
           header="Pagamento confermato"
           message="pagamento avvenuto con successo clicca ok per vedere l ordine"
           onConfirm={()=>{
             setOpenDialog(false)
+            setDialogtype(null)
             history.replace('/orders/my-orders')
           }}
           confirmText='Ok'
         />
+      )}
+
+      {openDialog && dialogType==='remove_card' && cardToDelete && (
+        <AlertDialog
+        header="Conferma"
+        message={`sei sicuro di voler eliminare ${cardToDelete.card?.brand}: ${cardToDelete.card?.last4} ?`}
+        onConfirm={async()=>{
+          if(!cardToDelete) return
+
+          const paymentMethod = await removeCard(cardToDelete.id)
+          if(paymentMethod){
+            setCardToDelete(null)
+            setDialogtype(null)
+            setOpenDialog(false)
+          }
+          
+        }}
+        onCancel={()=>{
+          setCardToDelete(null)
+          setDialogtype(null)
+          setOpenDialog(false)
+        }}
+      />
       )}
     </div>
   );
