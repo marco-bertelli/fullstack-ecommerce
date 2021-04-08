@@ -40,8 +40,10 @@ const Checkout: React.FC<Props> = () => {
   const [address, setAddress] = useState<Address | null>(null);
   const [loadAddress, setLoadAddress] = useState(true);
   const [openSetDefault, setOpenSetDefault] = useState(false);
-  const [cardToDelete, setCardToDelete] = useState<PaymentMethod | null>(null)
-  const [dialogType, setDialogtype] = useState<'inform_payment' | 'remove_card' |null> (null)
+  const [cardToDelete, setCardToDelete] = useState<PaymentMethod | null>(null);
+  const [dialogType, setDialogtype] = useState<
+    "inform_payment" | "remove_card" | null
+  >(null);
 
   const { cart } = useCartContext();
   const history = useHistory();
@@ -57,11 +59,16 @@ const Checkout: React.FC<Props> = () => {
   const {
     userCards,
     stripeCustomer,
+    setUserCards,
     loading: fetchCardsLoading,
     error: fetchCardsError,
   } = useFetchCards(userInfo);
 
-  const {removeCard, loading: removeCardLoading, error: removeCardError} = useRemoveCard()
+  const {
+    removeCard,
+    loading: removeCardLoading,
+    error: removeCardError,
+  } = useRemoveCard();
 
   const { openDialog, setOpenDialog } = useDialog();
 
@@ -94,6 +101,10 @@ const Checkout: React.FC<Props> = () => {
           userCards.data[0].id,
       });
       setDisabled(false);
+      reset();
+    } else {
+      setUseCard({ type: "new"})
+      setDisabled(true)
       reset();
     }
   }, [userCards?.data, stripeCustomer, reset]);
@@ -170,8 +181,8 @@ const Checkout: React.FC<Props> = () => {
         );
 
         if (finished) {
-          setOpenDialog(true)
-          setDialogtype('inform_payment')
+          setOpenDialog(true);
+          setDialogtype("inform_payment");
           reset();
         }
       }
@@ -199,8 +210,8 @@ const Checkout: React.FC<Props> = () => {
       );
 
       if (finished) {
-        setOpenDialog(true)
-        setDialogtype('inform_payment')
+        setOpenDialog(true);
+        setDialogtype("inform_payment");
         reset();
       }
     }
@@ -236,11 +247,11 @@ const Checkout: React.FC<Props> = () => {
                     name="card"
                     value={method.id}
                     style={{ width: "10%" }}
-                    defaultChecked={
+                    checked={
                       useCard.type === "saved" &&
                       useCard.payment_method === method.id
                     }
-                    onClick={() => {
+                    onChange={() => {
                       setUseCard({ type: "saved", payment_method: method.id });
                       setDisabled(false);
                       reset();
@@ -302,12 +313,14 @@ const Checkout: React.FC<Props> = () => {
                     ) : undefined}
                   </div>
 
-                  <p className="paragraph" style={{ width: "10%" }}
-                  onClick={() => {
-                    setCardToDelete(method)
-                    setDialogtype('remove_card')
-                    setOpenDialog(true)
-                  }}
+                  <p
+                    className="paragraph"
+                    style={{ width: "10%", cursor: "pointer" }}
+                    onClick={() => {
+                      setCardToDelete(method);
+                      setDialogtype("remove_card");
+                      setOpenDialog(true);
+                    }}
                   >
                     <FontAwesomeIcon
                       icon={["fas", "trash"]}
@@ -324,9 +337,9 @@ const Checkout: React.FC<Props> = () => {
                   type="radio"
                   name="card"
                   value="new-card"
-                  defaultChecked={useCard.type === "new"}
+                  checked={useCard.type === "new"}
                   style={{ width: "10%" }}
-                  onClick={() => {
+                  onChange={() => {
                     setUseCard({ type: "new" });
                     setDisabled(true);
                     reset();
@@ -489,40 +502,50 @@ const Checkout: React.FC<Props> = () => {
         </div>
       </div>
 
-      {openDialog && dialogType==='inform_payment' && (
+      {openDialog && dialogType === "inform_payment" && (
         <AlertDialog
           header="Pagamento confermato"
           message="pagamento avvenuto con successo clicca ok per vedere l ordine"
-          onConfirm={()=>{
-            setOpenDialog(false)
-            setDialogtype(null)
-            history.replace('/orders/my-orders')
+          onConfirm={() => {
+            setOpenDialog(false);
+            setDialogtype(null);
+            history.replace("/orders/my-orders");
           }}
-          confirmText='Ok'
+          confirmText="Ok"
         />
       )}
 
-      {openDialog && dialogType==='remove_card' && cardToDelete && (
+      {openDialog && dialogType === "remove_card" && cardToDelete && (
         <AlertDialog
-        header="Conferma"
-        message={`sei sicuro di voler eliminare ${cardToDelete.card?.brand}: ${cardToDelete.card?.last4} ?`}
-        onConfirm={async()=>{
-          if(!cardToDelete) return
+          header="Conferma"
+          message={`sei sicuro di voler eliminare ${cardToDelete.card?.brand}: **** **** **** ${cardToDelete.card?.last4} ?`}
+          onConfirm={async () => {
+            if (!cardToDelete) return;
 
-          const paymentMethod = await removeCard(cardToDelete.id)
-          if(paymentMethod){
-            setCardToDelete(null)
-            setDialogtype(null)
-            setOpenDialog(false)
-          }
-          
-        }}
-        onCancel={()=>{
-          setCardToDelete(null)
-          setDialogtype(null)
-          setOpenDialog(false)
-        }}
-      />
+            const paymentMethod = await removeCard(cardToDelete.id);
+            if (paymentMethod) {
+              setCardToDelete(null);
+              setDialogtype(null);
+              setOpenDialog(false);
+              setUserCards((prev) =>
+                prev
+                  ? {
+                      data: prev.data.filter(
+                        (item) => item.id !== paymentMethod.id
+                      ),
+                    }
+                  : prev
+              );
+            }
+          }}
+          onCancel={() => {
+            setCardToDelete(null);
+            setDialogtype(null);
+            setOpenDialog(false);
+          }}
+          loading={removeCardLoading}
+          error={removeCardError}
+        />
       )}
     </div>
   );
