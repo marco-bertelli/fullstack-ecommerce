@@ -6,6 +6,7 @@ import { isClient } from '../helpers';
 import Orders from '../pages/Order';
 import OrderDetail from '../pages/OrderDetail';
 import PageNotFound from '../pages/PageNotFound';
+import OrdersContextProvider from '../state/orders-context';
 import { Role } from '../types';
 
 
@@ -21,7 +22,7 @@ const OrderRoutes: React.FC<Props> = (props) => {
     return <Redirect to='/' />
     
         return (
-
+            <OrdersContextProvider>
             <Switch>
                 <Route path="/orders/my-orders/:id">
                     <OrderDetail />
@@ -35,6 +36,7 @@ const OrderRoutes: React.FC<Props> = (props) => {
                     <PageNotFound />
                 </Route>
             </Switch>
+            </OrdersContextProvider>
 
         );
 }
