@@ -9,6 +9,7 @@ import PageNotFound from "../pages/PageNotFound";
 import { Role } from "../types";
 import { isAdmin } from "../helpers";
 import OrdersContextProvider from "../state/orders-context";
+import OrdersCountsContextProvider from "../state/orderCounts-context";
 
 interface Props {}
 
@@ -31,7 +32,9 @@ const AdminRoutes: React.FC<Props> = (props) => {
 
       <Route path="/admin/manage-orders">
         <OrdersContextProvider>
-          <ManageOrders />
+          <OrdersCountsContextProvider>
+            <ManageOrders />
+          </OrdersCountsContextProvider>
         </OrdersContextProvider>
       </Route>
 
