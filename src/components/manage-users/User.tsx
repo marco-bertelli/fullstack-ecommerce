@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { UserInfo } from "../../types";
+import Button from "../Button";
+import { useUpdateRole } from "../../hooks/useUpdateRole";
 
 interface Props {
   user: UserInfo;
@@ -9,11 +11,21 @@ interface Props {
 }
 
 const User: React.FC<Props> = ({
-  user: { username, email, createdAt, role },
+  user: {id, username, email, createdAt, role },
   admin,
 }) => {
   const [newRole, setNewRole] = useState(role);
   const [isEditing, setisEditing] = useState(false);
+  const {updateRole, loading, error} = useUpdateRole();
+
+  const handleUpdateRole = async () =>{
+    if (role === newRole) return
+
+    const finished = await updateRole(id, newRole)
+    if (finished) setisEditing(false)
+
+    if(error) alert(error)
+  }
 
   return (
     <tr>
@@ -48,10 +60,10 @@ const User: React.FC<Props> = ({
             icon={["fas", "times-circle"]}
             style={{
               cursor: "pointer",
-              color: "red"
+              color: "red",
             }}
             size="1x"
-            onClick={() => setNewRole('CLIENT')}
+            onClick={() => setNewRole("CLIENT")}
           />
         ) : (
           ""
@@ -60,8 +72,25 @@ const User: React.FC<Props> = ({
 
       {/* Role - Admin */}
       <td className="table-cell">
-        {role === "ADMIN" ? (
-          <FontAwesomeIcon icon={["fas", "check-circle"]} size="1x" />
+        {newRole === "ADMIN" ? (
+          <FontAwesomeIcon
+            icon={["fas", "check-circle"]}
+            style={{
+              cursor: isEditing ? "pointer" : undefined,
+              color: isEditing ? "green" : undefined,
+            }}
+            size="1x"
+          />
+        ) : isEditing ? (
+          <FontAwesomeIcon
+            icon={["fas", "times-circle"]}
+            style={{
+              cursor: "pointer",
+              color: "red",
+            }}
+            size="1x"
+            onClick={() => setNewRole("ADMIN")}
+          />
         ) : (
           ""
         )}
@@ -79,11 +108,43 @@ const User: React.FC<Props> = ({
       {/* Edit */}
       {admin.role === "SUPER_ADMIN" && (
         <td className="table-cell">
-          {role !== "SUPER_ADMIN" ? (
-            <FontAwesomeIcon icon={["fas", "edit"]} size="1x" />
+          {role !== "SUPER_ADMIN" &&<>{!isEditing ? (
+            <FontAwesomeIcon
+              icon={["fas", "edit"]}
+              size="1x"
+              style={{cursor:'pointer'}}
+              onClick={() => setisEditing(true)}
+            />
           ) : (
-            ""
-          )}
+            <div className="table__update-action">
+              <Button
+                width="40%"
+                height="2rem"
+                className="btn--cancel"
+                style={{ fontSize: "1rem" }}
+                onClick={() => {
+                  setNewRole(role)
+                  setisEditing(false)
+                }}
+                disabled={loading}
+              >
+                Cancella
+              </Button>
+              <Button
+                width="40%"
+                height="2rem"
+                className="btn--confirm"
+                style={{ fontSize: "1rem" }}
+                onClick={handleUpdateRole}
+                loading={loading}
+                spinnerHeight={10}
+                spinnerWidth={10}
+                disabled={loading || role === newRole}
+              >
+                Conferma
+              </Button>
+            </div>
+          )}</>}
         </td>
       )}
     </tr>
