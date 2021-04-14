@@ -9,6 +9,9 @@ const env = functions.config();
 const ordersCollection = "orders";
 const orderCountsCollection = "order-counts";
 const orderCountsDocument = "counts";
+const usersCollection = "users";
+const usersCountsCollection = "user-counts";
+const usersCountDocument = "counts";
 
 type ProductCategory = "Clothing" | "Shoes" | "Watches" | "Accessories";
 
@@ -90,6 +93,30 @@ export const onSignup = functions.https.onCall(async (data, context) => {
 
   return {userRole};
 });
+
+export const onUserCreated = functions.firestore
+    .document(`${usersCollection}/{userId}`)
+    .onCreate(async (snapshot, context)=>{
+      // seleziono documento con i dati di conta
+      const countsData = await admin.firestore()
+          .collection(usersCountsCollection)
+          .doc(usersCountDocument).get();
+
+      if (!countsData.exists) {
+        // primo utente devo creare il doc
+        return admin.firestore()
+            .collection(usersCountsCollection)
+            .doc(usersCountDocument)
+            .set({userCounts: 1});
+      } else {
+        const {usersCounts} = countsData.data() as {usersCounts: number};
+
+        return admin.firestore()
+            .collection(usersCountsCollection)
+            .doc(usersCountDocument)
+            .set({userCounts: usersCounts + 1});
+      }
+    });
 
 export const onProductCreated = functions.firestore
     .document("products/{productId}")
