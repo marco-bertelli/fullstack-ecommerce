@@ -10,6 +10,7 @@ const ManageUsers: React.FC<Props> = () => {
   const {
     authState: { userInfo },
   } = useAuthContext();
+  console.log(userInfo)
   const { users, userCounts, loading, error } = useFetchUsers(userInfo);
   if (loading || userInfo==null) return <Spinner color="grey" width={50} height={50} />;
   if (error) return <h2 className="header--center">{error}</h2>;

@@ -7,6 +7,7 @@ import {
   faEdit,
   faTrash,
   faCheckCircle,
+  faTimesCircle
 } from "@fortawesome/free-solid-svg-icons";
 
 import {
@@ -29,5 +30,6 @@ library.add(
   faCheckCircle,
   faCcMastercard,
   faCcVisa,
-  faCcAmex
+  faCcAmex,
+  faTimesCircle
 );

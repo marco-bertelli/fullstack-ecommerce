@@ -37,7 +37,7 @@ export const useFetchUsers = (userInfo: UserInfo | null) => {
     });
     return () => unsubscribe();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [userInfo]);
 
   // recuper user-counts/counts
   useEffect(() => {
@@ -63,7 +63,7 @@ export const useFetchUsers = (userInfo: UserInfo | null) => {
       return () => unsubscribe()
 
       // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[])
+  },[userInfo])
 
   return {users, userCounts, loading, error}
 };
