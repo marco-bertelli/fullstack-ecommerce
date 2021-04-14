@@ -226,7 +226,7 @@ const ManageOrderDetail: React.FC<Props> = () => {
                 className='paragraph paragraph--focus'
                 style={{ width: '20%' }}
               >
-                ${formatAmount(quantity * price)}
+                €{formatAmount(quantity * price)}
               </p>
             </div>
           </div>
