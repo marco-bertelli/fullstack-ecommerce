@@ -1,5 +1,5 @@
 import React from "react";
-import OrderItem from "../components/OrderItem";
+import OrderItem from "../components/orders/OrderItem";
 import Spinner from "../components/Spinner";
 import { useOrdersContext } from "../state/orders-context";
 

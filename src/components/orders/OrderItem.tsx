@@ -4,8 +4,8 @@ import {
   calculateCartAmount,
   calculateCartQuantity,
   formatAmount,
-} from "../helpers";
-import { Order } from "../types";
+} from "../../helpers";
+import { Order } from "../../types";
 
 interface Props {
   order: Order;
