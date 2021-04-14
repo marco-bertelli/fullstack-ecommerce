@@ -107,14 +107,14 @@ export const onUserCreated = functions.firestore
         return admin.firestore()
             .collection(usersCountsCollection)
             .doc(usersCountDocument)
-            .set({userCounts: 1});
+            .set({usersCounts: 1});
       } else {
         const {usersCounts} = countsData.data() as {usersCounts: number};
 
         return admin.firestore()
             .collection(usersCountsCollection)
             .doc(usersCountDocument)
-            .set({userCounts: usersCounts + 1});
+            .set({usersCounts: usersCounts + 1});
       }
     });
 
