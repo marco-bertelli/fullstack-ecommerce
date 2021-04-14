@@ -13,6 +13,9 @@ const usersCollection = "users";
 const usersCountsCollection = "user-counts";
 const usersCountDocument = "counts";
 
+type Role = "SUPER_ADMIN" | "ADMIN" | "CLIENT";
+
+
 type ProductCategory = "Clothing" | "Shoes" | "Watches" | "Accessories";
 
 type Counts = {
@@ -116,6 +119,29 @@ export const onUserCreated = functions.firestore
             .doc(usersCountDocument)
             .set({usersCounts: usersCounts + 1});
       }
+    });
+
+export const updateUserRole = functions.https
+    .onCall(async (data, context) =>{
+      if (!context.auth) throw new Error("Non Autenticato");
+
+      const {userId, newRole} = data as {userId: string; newRole: Role};
+
+      // controllo auth dell'user che chiama la funzione
+      const adminUser = await admin.auth().getUser(context.auth.uid);
+      const {role} = adminUser.customClaims as {role: Role};
+      if (role !== "SUPER_ADMIN") {
+        throw new Error("Non hai i permessi necessari");
+      }
+
+      // Update the firebase auth
+      await admin.auth().setCustomUserClaims(userId, {role: newRole});
+
+      // Update user in user collection
+      return admin.firestore()
+          .collection(usersCollection)
+          .doc(userId)
+          .set({role: newRole}, {merge: true});
     });
 
 export const onProductCreated = functions.firestore
