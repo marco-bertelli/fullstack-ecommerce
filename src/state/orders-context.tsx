@@ -89,7 +89,7 @@ const OrdersContextProvider: React.FC<Props> = ({ children }) => {
 
     return () => unsubscribe()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [userInfo]);
 
   return (
     <OrderStateContext.Provider value={{ orders, loading, error }}>
