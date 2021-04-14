@@ -92,9 +92,11 @@ export type ShipmentStatus =
   | 'Delivered'
   | 'Canceled'
 
+export type PurchasedItem = Pick<CartItem, 'quantity' | 'user' | 'item'>
+
 export type Order = {
   id: string
-  items: Pick<CartItem, 'quantity' | 'user' | 'item'>[]
+  items: PurchasedItem[]
   amount: number
   totalQuantity: number
   shippingAddress: Address
