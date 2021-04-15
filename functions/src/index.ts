@@ -1,6 +1,7 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import Stripe from "stripe";
+import algoliasearch from "algoliasearch";
 
 admin.initializeApp();
 
@@ -56,6 +57,11 @@ const stripe=new Stripe(env.stripe.secret_key, {
   typescript: true,
 });
 
+const algoliaClient=algoliasearch(env.algolia.app_id,
+    env.algolia.admin_api_key);
+
+const usersIndex = algoliaClient.initIndex(usersCollection);
+
 export const onSignup = functions.https.onCall(async (data, context) => {
   // prendo il nome utente
   const {username} = data as { username: string };
@@ -100,6 +106,8 @@ export const onSignup = functions.https.onCall(async (data, context) => {
 export const onUserCreated = functions.firestore
     .document(`${usersCollection}/{userId}`)
     .onCreate(async (snapshot, context)=>{
+      const user = snapshot.data();
+
       // seleziono documento con i dati di conta
       const countsData = await admin.firestore()
           .collection(usersCountsCollection)
@@ -107,18 +115,57 @@ export const onUserCreated = functions.firestore
 
       if (!countsData.exists) {
         // primo utente devo creare il doc
-        return admin.firestore()
+        await admin.firestore()
             .collection(usersCountsCollection)
             .doc(usersCountDocument)
             .set({usersCounts: 1});
       } else {
         const {usersCounts} = countsData.data() as {usersCounts: number};
 
-        return admin.firestore()
+        await admin.firestore()
             .collection(usersCountsCollection)
             .doc(usersCountDocument)
             .set({usersCounts: usersCounts + 1});
       }
+      // create utente in algolia
+      return usersIndex.saveObject({
+        objectID: snapshot.id,
+        ...user,
+      });
+    });
+
+export const onUserUpdated = functions.firestore
+    .document(`${usersCollection}/{userId}`)
+    .onUpdate(async (snapshot, context)=>{
+      const user = snapshot.after.data();
+
+      return usersIndex.saveObject({
+        objectID: snapshot.after.id,
+        ...user,
+      });
+    });
+
+export const onUserDeleted = functions.firestore
+    .document(`${usersCollection}/{userId}`)
+    .onDelete(async (snapshot, context)=>{
+      // seleziono documento con i dati di conta
+      const countsData = await admin.firestore()
+          .collection(usersCountsCollection)
+          .doc(usersCountDocument).get();
+
+      if (!countsData.exists) {
+        // primo utente devo creare il doc
+        return;
+      } else {
+        const {usersCounts} = countsData.data() as {usersCounts: number};
+
+        await admin.firestore()
+            .collection(usersCountsCollection)
+            .doc(usersCountDocument)
+            .set({usersCounts: usersCounts>=1 ? usersCounts - 1 : 0});
+      }
+      // elimino utente da aloglia
+      return usersIndex.deleteObject(snapshot.id);
     });
 
 export const updateUserRole = functions.https
@@ -141,7 +188,11 @@ export const updateUserRole = functions.https
       return admin.firestore()
           .collection(usersCollection)
           .doc(userId)
-          .set({role: newRole}, {merge: true});
+          .set({
+            role: newRole,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          },
+          {merge: true});
     });
 
 export const onProductCreated = functions.firestore
