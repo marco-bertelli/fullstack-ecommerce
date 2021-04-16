@@ -60,7 +60,10 @@ const stripe=new Stripe(env.stripe.secret_key, {
 const algoliaClient=algoliasearch(env.algolia.app_id,
     env.algolia.admin_api_key);
 
+// indici algolia
 const usersIndex = algoliaClient.initIndex(usersCollection);
+const productsIndex = algoliaClient.initIndex("products");
+const ordersIndex = algoliaClient.initIndex(ordersCollection);
 
 export const onSignup = functions.https.onCall(async (data, context) => {
   // prendo il nome utente
@@ -237,8 +240,13 @@ export const onProductCreated = functions.firestore
 
       // update the collection
 
-      return admin.firestore().collection("product-counts")
+      await admin.firestore().collection("product-counts")
           .doc("counts").set(counts);
+
+      return productsIndex.saveObject({
+        objectID: snapshot.id,
+        ...product,
+      });
     });
 
 export const onProductUpdated = functions.firestore
@@ -250,7 +258,12 @@ export const onProductUpdated = functions.firestore
       // controllo se la category è cambiata o meno per aggiornare
       // paginazione
 
-      if (beforeProd.category === afterProd.category) return;
+      if (beforeProd.category === afterProd.category) {
+        return productsIndex.saveObject({
+          objectID: snapshot.after.id,
+          ...afterProd,
+        });
+      }
 
       // categoria cambiata
       const countsData = await admin.firestore()
@@ -266,8 +279,13 @@ export const onProductUpdated = functions.firestore
       counts[afterProd.category] = counts[afterProd.category] + 1;
 
 
-      return admin.firestore().collection("product-counts")
+      await admin.firestore().collection("product-counts")
           .doc("counts").set(counts);
+
+      return productsIndex.saveObject({
+        objectID: snapshot.after.id,
+        ...afterProd,
+      });
     });
 
 export const onProductDeleted = functions.firestore
@@ -288,8 +306,9 @@ export const onProductDeleted = functions.firestore
       counts.All = counts.All -1;
       counts[product.category] = counts[product.category] - 1;
 
-      return admin.firestore().collection("product-counts")
+      await admin.firestore().collection("product-counts")
           .doc("counts").set(counts);
+      return productsIndex.deleteObject(snapshot.id);
     });
 
 export const onOrderCreated = functions.firestore
@@ -328,7 +347,7 @@ export const onOrderCreated = functions.firestore
 
       if (!countsData.exists) {
         // primo ordine devo creare
-        return admin
+        await admin
             .firestore()
             .collection(orderCountsCollection)
             .doc(orderCountsDocument).set({orderCounts: 1});
@@ -337,11 +356,33 @@ export const onOrderCreated = functions.firestore
         // 1ordine
         const counts = countsData.data() as {orderCounts: number};
 
-        return admin
+        await admin
             .firestore()
             .collection(orderCountsCollection)
             .doc(orderCountsDocument).set({orderCounts: counts.orderCounts +1});
       }
+
+      return ordersIndex.saveObject({
+        objectID: snapshot.id,
+        ...order,
+      });
+    });
+
+export const onOrderUpdated = functions.firestore
+    .document(`${ordersCollection}/{orderId}`)
+    .onUpdate(async (snapshot, context)=>{
+      const updatedOrder = snapshot.after.data();
+
+      return ordersIndex.saveObject({
+        objectID: snapshot.after.id,
+        ...updatedOrder,
+      });
+    });
+
+export const onOrderDeleted = functions.firestore
+    .document(`${ordersCollection}/{orderId}`)
+    .onDelete(async (snapshot, context)=>{
+      return ordersIndex.deleteObject(snapshot.id);
     });
 
 
