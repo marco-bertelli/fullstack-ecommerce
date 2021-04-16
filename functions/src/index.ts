@@ -382,6 +382,28 @@ export const onOrderUpdated = functions.firestore
 export const onOrderDeleted = functions.firestore
     .document(`${ordersCollection}/{orderId}`)
     .onDelete(async (snapshot, context)=>{
+      // Update the order-counts/counts
+      const countsData = await admin
+          .firestore()
+          .collection(orderCountsCollection)
+          .doc(orderCountsDocument)
+          .get();
+
+      if (!countsData.exists) {
+        return;
+      } else {
+        // Found the counts document, update it
+        const counts = countsData.data() as { orderCounts: number };
+
+        await admin
+            .firestore()
+            .collection(orderCountsCollection)
+            .doc(orderCountsDocument)
+            .set({
+              orderCounts: counts.orderCounts >= 1 ? counts.orderCounts - 1 : 0,
+            });
+      }
+
       return ordersIndex.deleteObject(snapshot.id);
     });
 
