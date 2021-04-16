@@ -50,7 +50,8 @@ export const useFetchCards = (userInfo: UserInfo | null)=>{
        return() =>{
            mounted= false
        }
-   },[userInfo, setUserCards, setStripeCustomer, setLoading, setError])
+       // eslint-disable-next-line react-hooks/exhaustive-deps
+   },[setUserCards, setStripeCustomer, setLoading, setError])
 
    return {userCards,setUserCards,stripeCustomer,loading, error}
 }

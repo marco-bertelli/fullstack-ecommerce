@@ -236,7 +236,7 @@ const Checkout: React.FC<Props> = () => {
 
         {fetchCardsLoading ? (
           <Spinner color="grey" width={30} height={30} />
-        ) : (
+        ) : 
           <form className="form" onSubmit={handleCompletePayment}>
             {userCards?.data &&
               userCards.data.length > 0 &&
@@ -449,7 +449,7 @@ const Checkout: React.FC<Props> = () => {
               disabled={!stripe || !useCard || disabled || loading}
             ></button>
           </form>
-        )}
+        }
         {error && <p className="paragraph paragraph--error">{error}</p>}
 
         {fetchCardsError && (
