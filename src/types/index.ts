@@ -127,3 +127,8 @@ export type CreatePaymentMethod =
 export type UserCards = {data: PaymentMethod[]}
 
 export type StripeCustomer = {id: string; invoice_settings: {default_payment_method: string}}
+
+export type SearchProduct = Omit<Product, 'createdAt' | 'updatedAt'> & {
+  createdAt: {_seconds:number;_nanoseconds: number}
+  updatedAt?: {_seconds:number;_nanoseconds: number}
+}

@@ -1,6 +1,7 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { ChangeEvent, useState, KeyboardEvent} from "react";
 import { NavLink } from "react-router-dom";
+import { useSearchProducts } from "../../hooks/useSearchProducts";
 import { useAuthContext } from "../../state/auth-context";
 import Button from "../Button";
 import LoggedInNav from "./LoggedInNav";
@@ -14,14 +15,21 @@ const MainNav: React.FC<Props> = () => {
   } = useAuthContext();
 
   const [searchString, setSearchString] = useState("");
+  const {searchProducts, loading, error} = useSearchProducts()
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchString(e.target.value);
   };
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (!searchString) return;
 
-    console.log(searchString);
+    const hits = await searchProducts(searchString);
+
+    if(!hits){
+      if(error) alert(error)
+      return
+    }
+    console.log(hits)
   };
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if(e.key === 'Enter'){
@@ -58,7 +66,9 @@ const MainNav: React.FC<Props> = () => {
               />
             )}
           </div>
-          <Button className="btn--search" onClick={handleSearch}>
+          <Button className="btn--search" onClick={handleSearch}
+          loading={loading}
+          >
             Search
           </Button>
         </div>
