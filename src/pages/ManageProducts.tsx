@@ -14,7 +14,7 @@ interface Props {}
 const ManageProducts: React.FC<Props> = () => {
   const [openProductForm, setOpenProductForm] = useState(false);
   const {
-    productsState: { products, loading, error },
+    productsState: { products, loading, error, searchedProducts },
   } = useProductContext();
   const [productToEdit, setProductToEdit] = useState<Product | null>(null);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
@@ -63,8 +63,14 @@ const ManageProducts: React.FC<Props> = () => {
             </thead>
 
             <tbody>
-              {products.All.map((product) => (
-                <AdminProductItem
+              {searchedProducts ? (
+                <> 
+                {searchedProducts.length < 1 ? <tr>
+                  <td colSpan={6}>
+                    <h2 className="header--center">Nessun Prodotto</h2>
+                  </td>
+                </tr> : searchedProducts.map((product)=>(
+                  <AdminProductItem
                   product={product}
                   key={product.id}
                   setOpenProductForm={setOpenProductForm}
@@ -72,7 +78,20 @@ const ManageProducts: React.FC<Props> = () => {
                   setOpenDialog={setOpenDialog}
                   setProductToDelete={setProductToDelete}
                 />
-              ))}
+                ))}
+                </>
+              ) : (
+                products.All.map((product) => (
+                  <AdminProductItem
+                    product={product}
+                    key={product.id}
+                    setOpenProductForm={setOpenProductForm}
+                    setProductToEdit={setProductToEdit}
+                    setOpenDialog={setOpenDialog}
+                    setProductToDelete={setProductToDelete}
+                  />
+                ))
+              )}
             </tbody>
           </table>
         )}

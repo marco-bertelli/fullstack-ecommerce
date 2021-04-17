@@ -1,13 +1,13 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { ChangeEvent, useState, KeyboardEvent } from "react";
-import { NavLink } from "react-router-dom";
-import { useSearchProducts } from "../../hooks/useSearchProducts";
+import React, { ChangeEvent, useState, KeyboardEvent, useEffect } from "react";
+import { NavLink, useLocation } from "react-router-dom";
+import { useSearchItems } from "../../hooks/useSearchItems";
 import { useAuthContext } from "../../state/auth-context";
 import { useProductContext } from "../../state/product-context";
 import Button from "../Button";
 import LoggedInNav from "./LoggedInNav";
 import LoggedOutNav from "./LoggedOutNav";
-import { firebase } from "../../firebase/config";
+
 
 interface Props {}
 
@@ -20,7 +20,16 @@ const MainNav: React.FC<Props> = () => {
   } = useProductContext();
 
   const [searchString, setSearchString] = useState("");
-  const { searchProducts, loading, error } = useSearchProducts();
+  const location = useLocation()
+  const { searchItems, loading, error } = useSearchItems(location.pathname);
+  // effetto cancellare a mano ricerca
+  useEffect(()=>{
+    if(!searchString) setSearchedProducts(null)
+  }, [searchString, setSearchedProducts])
+  // effetto avviso errori
+  useEffect(()=>{
+    if (error) alert (error)
+  },[error])
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchString(e.target.value);
@@ -28,26 +37,7 @@ const MainNav: React.FC<Props> = () => {
   const handleSearch = async () => {
     if (!searchString) return;
 
-    const hits = await searchProducts(searchString);
-
-    if (!hits) {
-      if (error) alert(error);
-      return;
-    }
-
-    const products = hits.map((item) => {
-      const createdAt = firebase.firestore.Timestamp.fromDate(
-        new Date(item.createdAt._seconds * 1000)
-      );
-
-      const updatedAt = item.updatedAt ? firebase.firestore.Timestamp.fromDate(
-        new Date(item.updatedAt._seconds * 1000)
-      ) : undefined
-
-      return {...item,id:item.objectID, createdAt, updatedAt}
-    });
-
-    setSearchedProducts(products);
+    return searchItems(searchString);  
   };
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
@@ -91,6 +81,7 @@ const MainNav: React.FC<Props> = () => {
             className="btn--search"
             onClick={handleSearch}
             loading={loading}
+            disabled={loading}
           >
             Search
           </Button>
