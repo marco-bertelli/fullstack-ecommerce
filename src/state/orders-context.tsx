@@ -18,10 +18,12 @@ type OrdersState = {
   orders: Order[] | null;
   loading: boolean;
   error: string;
+  searchedOrders: Order[] | null
 };
 
 type OrdersDispatch = {
   setOrders: Dispatch<SetStateAction<Order[] | null>>;
+  setSearchedOrders: Dispatch<SetStateAction<Order[] | null>>;
 };
 
 const OrderStateContext = createContext<OrdersState | undefined>(undefined);
@@ -31,6 +33,7 @@ const OrdersDispatchContext = createContext<OrdersDispatch | undefined>(
 
 const OrdersContextProvider: React.FC<Props> = ({ children }) => {
   const [orders, setOrders] = useState<Order[] | null>(null);
+  const [searchedOrders, setSearchedOrders] = useState<Order[] | null>(null)
   const { loading, setLoading, error, setError } = useAsyncCall();
   const {
     authState: { userInfo },
@@ -92,8 +95,8 @@ const OrdersContextProvider: React.FC<Props> = ({ children }) => {
   }, [userInfo]);
 
   return (
-    <OrderStateContext.Provider value={{ orders, loading, error }}>
-      <OrdersDispatchContext.Provider value={{ setOrders }}>
+    <OrderStateContext.Provider value={{ orders, loading, error, searchedOrders}}>
+      <OrdersDispatchContext.Provider value={{ setOrders, setSearchedOrders }}>
         {children}
       </OrdersDispatchContext.Provider>
     </OrderStateContext.Provider>

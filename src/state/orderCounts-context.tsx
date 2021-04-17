@@ -58,7 +58,7 @@ const OrdersCountsContextProvider: React.FC<Props> = ({ children }) => {
 
 export default OrdersCountsContextProvider;
 
-export const useOrdersContext = () => {
+export const useOrdersCountsContext = () => {
   const ordersCountsState = useContext(OrderCountsStateContext);
   const ordersDispatch = useContext(OrdersCountsDispatchContext);
 

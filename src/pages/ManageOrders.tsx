@@ -7,7 +7,7 @@ interface Props {}
 
 const ManageOrders: React.FC<Props> = () => {
   const {
-    ordersState: { orders, loading, error },
+    ordersState: { orders, loading, error, searchedOrders},
   } = useOrdersContext();
   if (loading) return <Spinner color="grey" height={50} width={50} />;
 
@@ -48,7 +48,14 @@ const ManageOrders: React.FC<Props> = () => {
         </div>
 
         {/* ordini */}
-        {orders.map((order) => (
+        {searchedOrders ? <>
+        {searchedOrders.length < 1 ? <h2 className="header--center">Nessun Ordine</h2>
+          : searchedOrders.map((order) => (
+            <ManageOrderItems key={order.id} order={order} />
+          ))
+        }
+        
+         </> : orders.map((order) => (
           <ManageOrderItems key={order.id} order={order} />
         ))}
       </div>

@@ -3,6 +3,7 @@ import React, { ChangeEvent, useState, KeyboardEvent, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useSearchItems } from "../../hooks/useSearchItems";
 import { useAuthContext } from "../../state/auth-context";
+import { useOrdersContext } from "../../state/orders-context";
 import { useProductContext } from "../../state/product-context";
 import Button from "../Button";
 import LoggedInNav from "./LoggedInNav";
@@ -19,13 +20,18 @@ const MainNav: React.FC<Props> = () => {
     productsDispatch: { setSearchedProducts },
   } = useProductContext();
 
+  const {ordersDispatch: {setSearchedOrders}} = useOrdersContext()
+
   const [searchString, setSearchString] = useState("");
   const location = useLocation()
   const { searchItems, loading, error } = useSearchItems(location.pathname);
   // effetto cancellare a mano ricerca
   useEffect(()=>{
-    if(!searchString) setSearchedProducts(null)
-  }, [searchString, setSearchedProducts])
+    if(!searchString){ 
+      setSearchedProducts(null)
+      setSearchedOrders(null)
+    }
+  }, [searchString, setSearchedProducts, setSearchedOrders])
   // effetto avviso errori
   useEffect(()=>{
     if (error) alert (error)
@@ -73,6 +79,7 @@ const MainNav: React.FC<Props> = () => {
                 onClick={() => {
                   setSearchString("")
                   setSearchedProducts(null);
+                  setSearchedOrders(null)
                 }}
               />
             )}

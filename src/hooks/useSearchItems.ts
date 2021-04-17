@@ -1,7 +1,9 @@
 import firebase from "firebase";
-import { productsIndex } from "../algolia";
+import { ordersIndex, productsIndex } from "../algolia";
+import { useOrdersContext } from "../state/orders-context";
+
 import { useProductContext } from "../state/product-context";
-import { SearchProduct } from "../types";
+import { SearchOrder, SearchProduct } from "../types";
 import { useAsyncCall } from "./useAsyncCall";
 
 export const useSearchItems = (pathname: String) => {
@@ -9,6 +11,8 @@ export const useSearchItems = (pathname: String) => {
   const {
     productsDispatch: { setSearchedProducts },
   } = useProductContext();
+
+  const {ordersDispatch:{setSearchedOrders}} = useOrdersContext()
 
   const searchItems = async (searchString: string) => {
     try {
@@ -40,6 +44,30 @@ export const useSearchItems = (pathname: String) => {
         setLoading(false);
 
         return true;
+      } else if (pathname==='/admin/manage-orders'){
+
+        const result = await ordersIndex.search<SearchOrder>(searchString);
+
+        const orders = result.hits.map((item) => {
+          const createdAt = firebase.firestore.Timestamp.fromDate(
+            new Date(item.createdAt._seconds * 1000)
+          );
+
+          const updatedAt = item.updatedAt
+            ? firebase.firestore.Timestamp.fromDate(
+                new Date(item.updatedAt._seconds * 1000)
+              )
+            : undefined;
+
+          return { ...item, id: item.objectID, createdAt, updatedAt };
+        });
+
+        setSearchedOrders(orders);
+
+        setLoading(false);
+
+        return true;
+
       }
     } catch (error) {
       const { message } = error as { message: string };
