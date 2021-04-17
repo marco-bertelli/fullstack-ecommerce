@@ -137,3 +137,8 @@ export type SearchOrder = Omit<Order, 'createdAt' | 'updatedAt'> & {
   createdAt: {_seconds:number;_nanoseconds: number}
   updatedAt?: {_seconds:number;_nanoseconds: number}
 }
+
+export type SearchUser = Omit<UserInfo, 'createdAt' | 'updatedAt'> & {
+  createdAT: {_seconds:number;_nanoseconds: number}
+  updatedAt?: {_seconds:number;_nanoseconds: number}
+}

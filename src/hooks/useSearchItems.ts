@@ -1,7 +1,7 @@
 import firebase from "firebase";
-import { ordersIndex, productsIndex } from "../algolia";
+import { ordersIndex, productsIndex, usersIndex } from "../algolia";
 import { useSearchContext } from "../state/search-context";
-import { SearchOrder, SearchProduct } from "../types";
+import { SearchOrder, SearchProduct, SearchUser } from "../types";
 import { useAsyncCall } from "./useAsyncCall";
 
 export const useSearchItems = (pathname: String) => {
@@ -62,6 +62,28 @@ export const useSearchItems = (pathname: String) => {
 
         return true;
 
+      } else if (pathname === '/admin/manage-users'){
+        const result = await usersIndex.search<SearchUser>(searchString);
+
+        const users = result.hits.map((item) => {
+          const createdAt = firebase.firestore.Timestamp.fromDate(
+            new Date(item.createdAT._seconds * 1000)
+          );
+
+          const updatedAt = item.updatedAt
+            ? firebase.firestore.Timestamp.fromDate(
+                new Date(item.updatedAt._seconds * 1000)
+              )
+            : undefined;
+
+          return { ...item, id: item.objectID, createdAt, updatedAt };
+        });
+
+        setSearchedItems(users);
+
+        setLoading(false);
+
+        return true;
       }
     } catch (error) {
       const { message } = error as { message: string };
