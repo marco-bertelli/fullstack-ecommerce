@@ -9,21 +9,24 @@ import ModalContextProvider from "./state/modal-context";
 import AuthContextProvider from "./state/auth-context";
 import ProductsContextProvider from "./state/product-context";
 import CartContextProvider from "./state/CartContext";
+import SearchContextProvider from "./state/search-context";
 
 function App() {
   return (
     <AuthContextProvider>
-      <ModalContextProvider>
-        <ProductsContextProvider>
-          <CartContextProvider>
-            <BrowserRouter>
-              <Layout>
-                <Routes />
-              </Layout>
-            </BrowserRouter>
-          </CartContextProvider>
-        </ProductsContextProvider>
-      </ModalContextProvider>
+      <SearchContextProvider>
+        <ModalContextProvider>
+          <ProductsContextProvider>
+            <CartContextProvider>
+              <BrowserRouter>
+                <Layout>
+                  <Routes />
+                </Layout>
+              </BrowserRouter>
+            </CartContextProvider>
+          </ProductsContextProvider>
+        </ModalContextProvider>
+      </SearchContextProvider>
     </AuthContextProvider>
   );
 }

@@ -3,8 +3,7 @@ import React, { ChangeEvent, useState, KeyboardEvent, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useSearchItems } from "../../hooks/useSearchItems";
 import { useAuthContext } from "../../state/auth-context";
-import { useOrdersContext } from "../../state/orders-context";
-import { useProductContext } from "../../state/product-context";
+import { useSearchContext } from "../../state/search-context";
 import Button from "../Button";
 import LoggedInNav from "./LoggedInNav";
 import LoggedOutNav from "./LoggedOutNav";
@@ -16,22 +15,16 @@ const MainNav: React.FC<Props> = () => {
   const {
     authState: { authUser },
   } = useAuthContext();
-  const {
-    productsDispatch: { setSearchedProducts },
-  } = useProductContext();
-
-  const {ordersDispatch: {setSearchedOrders}} = useOrdersContext()
+  const {setSearchedItems} = useSearchContext()
 
   const [searchString, setSearchString] = useState("");
   const location = useLocation()
   const { searchItems, loading, error } = useSearchItems(location.pathname);
   // effetto cancellare a mano ricerca
   useEffect(()=>{
-    if(!searchString){ 
-      setSearchedProducts(null)
-      setSearchedOrders(null)
-    }
-  }, [searchString, setSearchedProducts, setSearchedOrders])
+    if(!searchString)setSearchedItems(null)
+  }, [searchString, setSearchedItems])
+
   // effetto avviso errori
   useEffect(()=>{
     if (error) alert (error)
@@ -78,8 +71,7 @@ const MainNav: React.FC<Props> = () => {
                 className="clear-search"
                 onClick={() => {
                   setSearchString("")
-                  setSearchedProducts(null);
-                  setSearchedOrders(null)
+                  setSearchedItems(null)
                 }}
               />
             )}

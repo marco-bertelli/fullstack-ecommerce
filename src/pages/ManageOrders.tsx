@@ -2,13 +2,16 @@ import React from "react";
 import ManageOrderItems from "../components/manage-orders/ManageOrderItems";
 import Spinner from "../components/Spinner";
 import { useOrdersContext } from "../state/orders-context";
+import { useSearchContext } from "../state/search-context";
+import { Order } from "../types";
 
 interface Props {}
 
 const ManageOrders: React.FC<Props> = () => {
   const {
-    ordersState: { orders, loading, error, searchedOrders},
+    ordersState: { orders, loading, error},
   } = useOrdersContext();
+  const {searchedItems} = useSearchContext()
   if (loading) return <Spinner color="grey" height={50} width={50} />;
 
   if (error) return <h2 className="header-center">{error}</h2>;
@@ -48,9 +51,9 @@ const ManageOrders: React.FC<Props> = () => {
         </div>
 
         {/* ordini */}
-        {searchedOrders ? <>
-        {searchedOrders.length < 1 ? <h2 className="header--center">Nessun Ordine</h2>
-          : searchedOrders.map((order) => (
+        {searchedItems ? <>
+        {searchedItems.length < 1 ? <h2 className="header--center">Nessun Ordine</h2>
+          : (searchedItems as Order[]).map((order) => (
             <ManageOrderItems key={order.id} order={order} />
           ))
         }

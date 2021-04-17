@@ -7,6 +7,7 @@ import Spinner from "../components/Spinner";
 import { useDialog } from "../hooks/useDialog";
 import { useManageProduct } from "../hooks/useManageProduct";
 import { useProductContext } from "../state/product-context";
+import { useSearchContext } from "../state/search-context";
 import { Product } from "../types";
 
 interface Props {}
@@ -14,8 +15,9 @@ interface Props {}
 const ManageProducts: React.FC<Props> = () => {
   const [openProductForm, setOpenProductForm] = useState(false);
   const {
-    productsState: { products, loading, error, searchedProducts },
+    productsState: { products, loading, error},
   } = useProductContext();
+  const {searchedItems} = useSearchContext()
   const [productToEdit, setProductToEdit] = useState<Product | null>(null);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const { openDialog, setOpenDialog } = useDialog();
@@ -63,13 +65,13 @@ const ManageProducts: React.FC<Props> = () => {
             </thead>
 
             <tbody>
-              {searchedProducts ? (
+              {searchedItems ? (
                 <> 
-                {searchedProducts.length < 1 ? <tr>
+                {searchedItems.length < 1 ? <tr>
                   <td colSpan={6}>
                     <h2 className="header--center">Nessun Prodotto</h2>
                   </td>
-                </tr> : searchedProducts.map((product)=>(
+                </tr> : (searchedItems as Product[]).map((product)=>(
                   <AdminProductItem
                   product={product}
                   key={product.id}

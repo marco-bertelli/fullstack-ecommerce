@@ -1,18 +1,12 @@
 import firebase from "firebase";
 import { ordersIndex, productsIndex } from "../algolia";
-import { useOrdersContext } from "../state/orders-context";
-
-import { useProductContext } from "../state/product-context";
+import { useSearchContext } from "../state/search-context";
 import { SearchOrder, SearchProduct } from "../types";
 import { useAsyncCall } from "./useAsyncCall";
 
 export const useSearchItems = (pathname: String) => {
   const { loading, setLoading, error, setError } = useAsyncCall();
-  const {
-    productsDispatch: { setSearchedProducts },
-  } = useProductContext();
-
-  const {ordersDispatch:{setSearchedOrders}} = useOrdersContext()
+  const {setSearchedItems} = useSearchContext()
 
   const searchItems = async (searchString: string) => {
     try {
@@ -39,7 +33,7 @@ export const useSearchItems = (pathname: String) => {
           return { ...item, id: item.objectID, createdAt, updatedAt };
         });
 
-        setSearchedProducts(products);
+        setSearchedItems(products);
 
         setLoading(false);
 
@@ -62,7 +56,7 @@ export const useSearchItems = (pathname: String) => {
           return { ...item, id: item.objectID, createdAt, updatedAt };
         });
 
-        setSearchedOrders(orders);
+        setSearchedItems(orders);
 
         setLoading(false);
 

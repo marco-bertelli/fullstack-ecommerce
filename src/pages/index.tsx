@@ -5,6 +5,8 @@ import Spinner from "../components/Spinner";
 import { useAuthContext } from "../state/auth-context";
 import { useModalContext } from "../state/modal-context";
 import { useProductContext } from "../state/product-context";
+import { useSearchContext } from "../state/search-context";
+import { Product } from "../types";
 interface Props {}
 
 const Index: React.FC<Props> = () => {
@@ -15,8 +17,9 @@ const Index: React.FC<Props> = () => {
     authState: { authUser, signoutRedirect },
   } = useAuthContext();
   const {
-    productsState: { products, loading, searchedProducts },
+    productsState: { products, loading },
   } = useProductContext();
+  const {searchedItems} = useSearchContext();
 
   //aprire il pop-up quando un utente viene rendirizzato
   useEffect(() => {
@@ -39,12 +42,12 @@ const Index: React.FC<Props> = () => {
   return (
     <div className="page--products">
       <div className="products">
-        {searchedProducts ? (
+        {searchedItems ? (
           <>
-            {searchedProducts.length < 1 ? (
+            {searchedItems.length < 1 ? (
               <h2 className="header--center">Nessun prodotto trovato</h2>
             ) : (
-              searchedProducts.map((product) => (
+              (searchedItems as Product[]).map((product) => (
                 <ProductItem key={product.id} product={product} />
               ))
             )}
