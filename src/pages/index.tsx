@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import ProductItem from "../components/products/ProductItem";
 import Spinner from "../components/Spinner";
@@ -27,6 +27,8 @@ const Index: React.FC<Props> = () => {
   const { searchedItems } = useSearchContext();
   const { activeTab } = useSelectTab<ProductTab>(prodTabType, "All");
 
+  const [productsByCat, setProductsByCat] = useState(products[activeTab])
+
   //aprire il pop-up quando un utente viene rendirizzato
   useEffect(() => {
     //open sign-in modal dopo redirect dell'utente
@@ -40,6 +42,12 @@ const Index: React.FC<Props> = () => {
       history.replace("/", undefined);
     }
   }, [setModalType, state, authUser, history, signoutRedirect]);
+
+  // quando cambio tab cambio prodotti
+  useEffect(() => {
+    setProductsByCat(products[activeTab])
+
+  },[activeTab, products])
 
   if (loading) return <Spinner color="grey" width={50} height={50} />;
 
@@ -64,7 +72,7 @@ const Index: React.FC<Props> = () => {
             )}
           </>
         ) : (
-          products.All.map((product) => (
+          productsByCat.map((product) => (
             <ProductItem key={product.id} product={product} />
           ))
         )}
