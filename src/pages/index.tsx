@@ -5,6 +5,7 @@ import ProductItem from "../components/products/ProductItem";
 import Spinner from "../components/Spinner";
 import Tab from "../components/Tab";
 import { productTabs } from "../helpers";
+import { usePagination } from "../hooks/usePagination";
 import { useSelectTab } from "../hooks/useSelectTab";
 import { useAuthContext } from "../state/auth-context";
 import { useModalContext } from "../state/modal-context";
@@ -13,6 +14,8 @@ import { useSearchContext } from "../state/search-context";
 import { Product, ProductTab } from "../types";
 
 export const prodTabType = "cat";
+
+export const perPage = 1;
 interface Props {}
 
 const Index: React.FC<Props> = () => {
@@ -23,13 +26,21 @@ const Index: React.FC<Props> = () => {
     authState: { authUser, signoutRedirect },
   } = useAuthContext();
   const {
-    productsState: { products, loading },
+    productsState: { products, loading, productCounts },
   } = useProductContext();
+
   const { searchedItems } = useSearchContext();
   const { activeTab } = useSelectTab<ProductTab>(prodTabType, "All");
 
   const [productsByCat, setProductsByCat] = useState(products[activeTab]);
+  const [paginetedSearchedItems, setPaginatedSearchItems] = useState(searchedItems)
 
+  const { page, totalPages } = usePagination<ProductTab, Product>(
+    productCounts[activeTab],
+    perPage,
+    activeTab,
+    searchedItems as Product[]
+  );
   //aprire il pop-up quando un utente viene rendirizzato
   useEffect(() => {
     //open sign-in modal dopo redirect dell'utente
@@ -46,8 +57,17 @@ const Index: React.FC<Props> = () => {
 
   // quando cambio tab cambio prodotti
   useEffect(() => {
-    setProductsByCat(products[activeTab]);
-  }, [activeTab, products]);
+    const startIndex = perPage * (page - 1)
+    const endIndex = perPage * page
+    if(searchedItems){
+      setPaginatedSearchItems(searchedItems.slice(startIndex, endIndex))
+      setProductsByCat([ ])
+    } else {
+    setProductsByCat(products[activeTab].slice(startIndex, endIndex));
+    setPaginatedSearchItems(null)
+  }
+  
+  }, [activeTab, products, page, searchedItems]);
 
   if (loading) return <Spinner color="grey" width={50} height={50} />;
 
@@ -68,16 +88,21 @@ const Index: React.FC<Props> = () => {
       </div>
 
       <div className="pagination-container">
-        <Pagination page={1} totalPages={3} tabType={prodTabType} activeTab={activeTab} />
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          tabType={searchedItems ? undefined : prodTabType}
+          activeTab={searchedItems ? undefined : activeTab}
+        />
       </div>
 
       <div className="products">
-        {searchedItems ? (
+        {paginetedSearchedItems ? (
           <>
-            {searchedItems.length < 1 ? (
+            {paginetedSearchedItems.length < 1 ? (
               <h2 className="header--center">Nessun prodotto trovato</h2>
             ) : (
-              (searchedItems as Product[]).map((product) => (
+              (paginetedSearchedItems as Product[]).map((product) => (
                 <ProductItem key={product.id} product={product} />
               ))
             )}

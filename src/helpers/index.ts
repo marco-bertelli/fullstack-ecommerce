@@ -33,4 +33,6 @@ export const formatAmount = (amount: number) =>
 
 export const calculateCartQuantity = (cart:(CartItem | PurchasedItem)[]) => cart.reduce((qty, item) => qty + item.quantity, 0)
 
-export const calculateCartAmount = (cart:(CartItem | PurchasedItem)[]) => cart.reduce((amount, cartItem) => amount + (cartItem.quantity * cartItem.item.price), 0) 
+export const calculateCartAmount = (cart:(CartItem | PurchasedItem)[]) => cart.reduce((amount, cartItem) => amount + (cartItem.quantity * cartItem.item.price), 0)
+
+export const calculateTotalPages = (totalItems:number, perPage: number) => Math.ceil(totalItems / perPage)

@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { ChangeEvent, useState, KeyboardEvent, useEffect } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useHistory, useLocation } from "react-router-dom";
 import { useSearchItems } from "../../hooks/useSearchItems";
 import { useAuthContext } from "../../state/auth-context";
 import { useSearchContext } from "../../state/search-context";
@@ -20,9 +20,13 @@ const MainNav: React.FC<Props> = () => {
   const [searchString, setSearchString] = useState("");
   const location = useLocation()
   const { searchItems, loading, error } = useSearchItems(location.pathname);
+  const history = useHistory();
   // effetto cancellare a mano ricerca
   useEffect(()=>{
-    if(!searchString)setSearchedItems(null)
+    if(!searchString){
+      setSearchedItems(null)
+      history.replace(location.pathname)
+    }
   }, [searchString, setSearchedItems])
 
   // effetto avviso errori
@@ -72,6 +76,7 @@ const MainNav: React.FC<Props> = () => {
                 onClick={() => {
                   setSearchString("")
                   setSearchedItems(null)
+                  history.replace(location.pathname)
                 }}
               />
             )}
