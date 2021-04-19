@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
+import Pagination from "../components/Pagination";
 import ProductItem from "../components/products/ProductItem";
 import Spinner from "../components/Spinner";
 import Tab from "../components/Tab";
@@ -27,7 +28,7 @@ const Index: React.FC<Props> = () => {
   const { searchedItems } = useSearchContext();
   const { activeTab } = useSelectTab<ProductTab>(prodTabType, "All");
 
-  const [productsByCat, setProductsByCat] = useState(products[activeTab])
+  const [productsByCat, setProductsByCat] = useState(products[activeTab]);
 
   //aprire il pop-up quando un utente viene rendirizzato
   useEffect(() => {
@@ -45,9 +46,8 @@ const Index: React.FC<Props> = () => {
 
   // quando cambio tab cambio prodotti
   useEffect(() => {
-    setProductsByCat(products[activeTab])
-
-  },[activeTab, products])
+    setProductsByCat(products[activeTab]);
+  }, [activeTab, products]);
 
   if (loading) return <Spinner color="grey" width={50} height={50} />;
 
@@ -57,9 +57,20 @@ const Index: React.FC<Props> = () => {
     <div className="page--products">
       <div className="products-category">
         {productTabs.map((cat) => (
-          <Tab key={cat} label={cat} tabType={prodTabType} activeTab={activeTab} />
+          <Tab
+            key={cat}
+            label={cat}
+            tabType={prodTabType}
+            activeTab={activeTab}
+            withPagination={true}
+          />
         ))}
       </div>
+
+      <div className="pagination-container">
+        <Pagination page={1} totalPages={3} tabType={prodTabType} activeTab={activeTab} />
+      </div>
+
       <div className="products">
         {searchedItems ? (
           <>
