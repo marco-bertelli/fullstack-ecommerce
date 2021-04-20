@@ -15,7 +15,7 @@ import { Product, ProductTab } from "../types";
 
 export const prodTabType = "cat";
 
-export const perPage = 1;
+export const perPage = 6;
 interface Props {}
 
 const Index: React.FC<Props> = () => {
@@ -26,14 +26,16 @@ const Index: React.FC<Props> = () => {
     authState: { authUser, signoutRedirect },
   } = useAuthContext();
   const {
-    productsState: { products, loading, productCounts },
+    productsState: { products, loading, productCounts, queryMoreProducts },
   } = useProductContext();
 
   const { searchedItems } = useSearchContext();
   const { activeTab } = useSelectTab<ProductTab>(prodTabType, "All");
 
   const [productsByCat, setProductsByCat] = useState(products[activeTab]);
-  const [paginetedSearchedItems, setPaginatedSearchItems] = useState(searchedItems)
+  const [paginetedSearchedItems, setPaginatedSearchItems] = useState(
+    searchedItems
+  );
 
   const { page, totalPages } = usePagination<ProductTab, Product>(
     productCounts[activeTab],
@@ -57,17 +59,23 @@ const Index: React.FC<Props> = () => {
 
   // quando cambio tab cambio prodotti
   useEffect(() => {
-    const startIndex = perPage * (page - 1)
-    const endIndex = perPage * page
-    if(searchedItems){
-      setPaginatedSearchItems(searchedItems.slice(startIndex, endIndex))
-      setProductsByCat([ ])
+    const startIndex = perPage * (page - 1);
+    const endIndex = perPage * page;
+    if (searchedItems) {
+      setPaginatedSearchItems(searchedItems.slice(startIndex, endIndex));
+      setProductsByCat([]);
     } else {
-    setProductsByCat(products[activeTab].slice(startIndex, endIndex));
-    setPaginatedSearchItems(null)
-  }
-  
-  }, [activeTab, products, page, searchedItems]);
+      if (
+        products[activeTab].length < productCounts[activeTab] &&
+        products[activeTab].length < perPage * page
+      ) {
+        //recuperare altri prodotti
+        return queryMoreProducts()
+      }
+      setProductsByCat(products[activeTab].slice(startIndex, endIndex));
+      setPaginatedSearchItems(null);
+    }
+  }, [activeTab, products, page, searchedItems, productCounts]);
 
   if (loading) return <Spinner color="grey" width={50} height={50} />;
 
