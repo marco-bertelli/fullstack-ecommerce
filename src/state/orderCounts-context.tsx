@@ -60,12 +60,12 @@ export default OrdersCountsContextProvider;
 
 export const useOrdersCountsContext = () => {
   const ordersCountsState = useContext(OrderCountsStateContext);
-  const ordersDispatch = useContext(OrdersCountsDispatchContext);
+  const ordersCountsDispatch = useContext(OrdersCountsDispatchContext);
 
-  if (ordersCountsState === undefined || ordersDispatch === undefined)
+  if (ordersCountsState === undefined || ordersCountsDispatch === undefined)
     throw new Error(
       "UseOrdersContext must be used within OrdersContextProvider."
     );
 
-  return { ordersCountsState, ordersDispatch };
+  return { ordersCountsState, ordersCountsDispatch };
 };
