@@ -35,7 +35,6 @@ const OrdersDispatchContext = createContext<OrdersDispatch | undefined>(
 
 const OrdersContextProvider: React.FC<Props> = ({ children }) => {
   const [orders, setOrders] = useState<Order[] | null>(null);
-  const [searchedOrders, setSearchedOrders] = useState<Order[] | null>(null);
   const { loading, setLoading, error, setError } = useAsyncCall();
   const {
     authState: { userInfo },

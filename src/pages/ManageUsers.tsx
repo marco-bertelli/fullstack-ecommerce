@@ -43,6 +43,7 @@ const ManageUsers: React.FC<Props> = () => {
       setUsersByPage(users.slice(startIndex,endIndex))
       setPaginatedSearchItems(null)
     }
+    //eslint-disable-next-line react-hooks/exhaustive-deps
   },[searchedItems, users, page, userCounts])
 
   if (loading || userInfo == null)

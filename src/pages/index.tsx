@@ -75,6 +75,7 @@ const Index: React.FC<Props> = () => {
       setProductsByCat(products[activeTab].slice(startIndex, endIndex));
       setPaginatedSearchItems(null);
     }
+    //eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, products, page, searchedItems, productCounts]);
 
   if (loading) return <Spinner color="grey" width={50} height={50} />;

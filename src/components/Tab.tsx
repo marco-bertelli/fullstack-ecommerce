@@ -1,6 +1,5 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ProductTab } from "../types";
 
 interface Props<T> {
   label: T;

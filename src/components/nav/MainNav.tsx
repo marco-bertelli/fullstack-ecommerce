@@ -27,7 +27,7 @@ const MainNav: React.FC<Props> = () => {
       setSearchedItems(null)
       history.replace(location.pathname)
     }
-  }, [searchString, setSearchedItems, location.pathname])
+  }, [searchString, setSearchedItems, location.pathname, history])
 
   // effetto avviso errori
   useEffect(()=>{

@@ -63,6 +63,7 @@ const ManageProducts: React.FC<Props> = () => {
       setProductByPage(products.All.slice(startIndex, endIndex));
       setPaginatedSearchItems(null)
     }
+    //eslint-disable-next-line react-hooks/exhaustive-deps
   },[products.All, productCounts.All, page, searchedItems]);
   if (loading) return <Spinner color="grey" width={50} height={50} />;
 

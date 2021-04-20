@@ -65,6 +65,7 @@ const ManageOrders: React.FC<Props> = () => {
         // se tolgo ricerca resetto allo state originale
         setPaginatedSearchItems(null)
     }
+    //eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, orders, setOrdersByTab, page, searchedItems, orderCounts]);
 
   if (loading) return <Spinner color="grey" height={50} width={50} />;

@@ -35,7 +35,7 @@ export const usePagination = <T, U>(
       history.replace(`${pathname}?page=1`)
       
     } else setTotalPages(calculateTotalPages(totalItems, perPage));
-  }, [activeTab, searchedItems, totalItems, perPage, pathname]);
+  }, [activeTab, searchedItems, totalItems, perPage, pathname, history]);
 
   return { page, totalPages };
 };
