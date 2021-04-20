@@ -33,7 +33,10 @@ const AdminProductItem: React.FC<Props> = ({
       <td className="table-cell table-cell--hide">
         {product.updatedAt && product.updatedAt.toDate().toDateString()}
       </td>
-      <td className="table-cell">{product.inventory}</td>
+      <td 
+        className="table-cell"
+        style={{ color: product.inventory === 0 ? 'red' : undefined}}
+      >{product.inventory}</td>
       <td
         className="table-cell table-cell--icon"
         onClick={() => {
