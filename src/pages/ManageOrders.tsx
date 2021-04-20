@@ -1,6 +1,8 @@
 import React from "react";
 import ManageOrderItems from "../components/manage-orders/ManageOrderItems";
 import Spinner from "../components/Spinner";
+import Tab from "../components/Tab";
+import { orderTabs } from "../helpers";
 import { useOrdersContext } from "../state/orders-context";
 import { useSearchContext } from "../state/search-context";
 import { Order } from "../types";
@@ -24,7 +26,9 @@ const ManageOrders: React.FC<Props> = () => {
       <div className="orders-header">
         <h2 className="header header--orders">I tuoi Ordini</h2>
 
-        <div className="orders tab"></div>
+        <div className="orders tab">
+        
+        </div>
       </div>
 
       <div className="orders-detail">

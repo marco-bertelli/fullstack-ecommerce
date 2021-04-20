@@ -1,4 +1,4 @@
-import { CartItem, ProductCategory, ProductTab, PurchasedItem, Role, ShipmentStatus } from "../types";
+import { CartItem, OrderTab, ProductCategory, ProductTab, PurchasedItem, Role, ShipmentStatus } from "../types";
 
 export const isAdmin = (role: Role | null) =>
   role === "ADMIN" || role === "SUPER_ADMIN";
@@ -16,7 +16,7 @@ export const shipmentStatues: ShipmentStatus[] = [
   "Preparing",
   "Shipped",
   "Delivered",
-  "Canceled"
+  "Canceled",
 ];
 
 export const productTabs: ProductTab[] = [
@@ -25,6 +25,15 @@ export const productTabs: ProductTab[] = [
   "Shoes",
   "Watches",
   "Accessories"
+]
+
+export const orderTabs: OrderTab[] = [
+  "New",
+  "Preparing",
+  "Shipped",
+  "Delivered",
+  "Canceled",
+  "All"
 ]
 
 export const formatAmount = (amount: number) =>
