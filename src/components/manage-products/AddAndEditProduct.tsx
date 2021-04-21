@@ -135,7 +135,6 @@ const AddAndEditProduct: React.FC<Props> = ({
 
   useEffect(() => {
     if (editProductFinished) {
-      reset();
       setSelectedFile(null);
       setUploadProgression(0);
       setProductToEdit(null);
@@ -143,7 +142,6 @@ const AddAndEditProduct: React.FC<Props> = ({
     }
   }, [
     editProductFinished,
-    reset,
     setUploadProgression,
     setSelectedFile,
     setProductToEdit,
