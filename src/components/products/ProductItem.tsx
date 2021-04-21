@@ -10,7 +10,7 @@ interface Props {
 const ProductItem: React.FC<Props> = ({ product }) => {
   return (
     <Link to={`${product.path}`}>
-      <div className="product">
+      <div className="card">
         <img
           src={product.imageUrl}
           alt={product.title}
